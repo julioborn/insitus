@@ -29,14 +29,24 @@ export default function RegisterPage() {
     setError("");
 
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
-    const { error: signUpError } = await supabaseClient.auth.signUp({
+    const { data, error: signUpError } = await supabaseClient.auth.signUp({
       email,
       password,
       options: { data: { name: fullName, age, birth_date: birthDate } },
     });
 
+    if (signUpError) { setLoading(false); setError(signUpError.message); return; }
+
+    // Crear perfil manualmente
+    if (data.user) {
+      await supabaseClient.from("profiles").upsert({
+        id: data.user.id,
+        name: fullName,
+        age,
+      });
+    }
+
     setLoading(false);
-    if (signUpError) { setError(signUpError.message); return; }
     router.push("/login?registered=1");
   }
 
