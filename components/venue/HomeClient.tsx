@@ -29,18 +29,20 @@ export function HomeClient({ userId }: Props) {
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
-      <header className="flex items-center justify-between px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <span className="text-lg font-bold tracking-[0.12em] text-white">Incontro</span>
-        <div className="flex items-center gap-3">
+      <header className="flex items-center justify-between px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <span className="text-xl font-bold tracking-[0.08em] text-white">Incontro</span>
+        <div className="flex items-center gap-2">
           {ghostMode && (
-            <span className="text-xs px-2 py-0.5 rounded-full text-white/60" style={{ background: "rgba(255,255,255,0.08)" }}>
+            <span className="text-[11px] px-2.5 py-1 rounded-full font-medium"
+              style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}>
               👻 Fantasma
             </span>
           )}
           {isInsideVenue && activeVenue && (
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-xs text-white/60">{activeVenue.name}</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+              style={{ background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.2)" }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-[11px] font-medium text-green-400">{activeVenue.name}</span>
             </div>
           )}
         </div>

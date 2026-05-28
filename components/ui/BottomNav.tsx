@@ -2,29 +2,85 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+const HomeIcon = ({ filled }: { filled: boolean }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    {filled ? (
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H15v-5H9v5H4a1 1 0 01-1-1V9.5z" fill="currentColor"/>
+    ) : (
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H15v-5H9v5H4a1 1 0 01-1-1V9.5z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+    )}
+  </svg>
+);
+
+const MatchIcon = ({ filled }: { filled: boolean }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    {filled ? (
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
+    ) : (
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+    )}
+  </svg>
+);
+
+const ProfileIcon = ({ filled }: { filled: boolean }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    {filled ? (
+      <>
+        <circle cx="12" cy="8" r="4" fill="currentColor"/>
+        <path d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+      </>
+    ) : (
+      <>
+        <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8"/>
+        <path d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+      </>
+    )}
+  </svg>
+);
+
 const ITEMS = [
-  { href: "/home",    icon: "🏠", label: "Inicio" },
-  { href: "/matches", icon: "💬", label: "Matches" },
-  { href: "/profile/me", icon: "👤", label: "Perfil" },
+  { href: "/home",       label: "Inicio",  Icon: HomeIcon },
+  { href: "/matches",    label: "Matches", Icon: MatchIcon },
+  { href: "/profile/me", label: "Perfil",  Icon: ProfileIcon },
 ];
 
 export function BottomNav() {
   const path = usePathname();
+
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 safe-bottom flex items-center justify-around px-2 py-3"
-      style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.08)" }}
+      className="fixed bottom-0 left-0 right-0 flex items-center justify-around px-4 pb-safe"
+      style={{
+        background: "rgba(0,0,0,0.92)",
+        backdropFilter: "blur(24px)",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        height: "64px",
+      }}
     >
-      {ITEMS.map(item => {
-        const active = path.startsWith(item.href);
+      {ITEMS.map(({ href, label, Icon }) => {
+        const active = path.startsWith(href);
         return (
           <Link
-            key={item.href} href={item.href}
-            className="flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-colors"
-            style={{ color: active ? "#8296E3" : "rgba(255,255,255,0.40)" }}
+            key={href}
+            href={href}
+            className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all"
+            style={{ color: active ? "#8296E3" : "rgba(255,255,255,0.35)" }}
           >
-            <span className="text-xl">{item.icon}</span>
-            <span className="text-[10px] font-medium">{item.label}</span>
+            <div className="relative flex items-center justify-center">
+              <Icon filled={active} />
+              {active && (
+                <span
+                  className="absolute -bottom-1 w-1 h-1 rounded-full"
+                  style={{ background: "#8296E3" }}
+                />
+              )}
+            </div>
+            <span
+              className="text-[10px] font-medium tracking-wide transition-all"
+              style={{ opacity: active ? 1 : 0.7 }}
+            >
+              {label}
+            </span>
           </Link>
         );
       })}
