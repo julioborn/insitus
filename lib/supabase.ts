@@ -27,6 +27,10 @@ export interface Profile {
   id: string;
   name: string | null;
   age: number | null;
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  birth_date: string | null;
   bio: string | null;
   instagram_handle: string | null;
   avatar_url: string | null;

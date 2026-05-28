@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
     const { data } = await supabase.auth.exchangeCodeForSession(code);
 
     if (data.user) {
-      const { id, user_metadata } = data.user;
-      // Crear perfil si no existe
+      const { id, email, user_metadata } = data.user;
+
       const { data: existing } = await supabaseAdmin
         .from("profiles")
         .select("id")
@@ -38,12 +38,19 @@ export async function GET(req: NextRequest) {
         .single();
 
       if (!existing) {
-        const fullName = user_metadata?.full_name ?? user_metadata?.name ?? null;
         await supabaseAdmin.from("profiles").insert({
           id,
-          name: fullName,
-          avatar_url: user_metadata?.avatar_url ?? null,
+          email: email ?? null,
+          name: user_metadata?.full_name ?? user_metadata?.name ?? null,
+          first_name: user_metadata?.given_name ?? null,
+          last_name: user_metadata?.family_name ?? null,
+          avatar_url: user_metadata?.avatar_url ?? user_metadata?.picture ?? null,
         });
+      } else {
+        // Actualizar avatar si cambió
+        await supabaseAdmin.from("profiles").update({
+          avatar_url: user_metadata?.avatar_url ?? user_metadata?.picture ?? null,
+        }).eq("id", id);
       }
     }
   }

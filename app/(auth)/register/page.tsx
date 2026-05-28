@@ -42,8 +42,12 @@ export default function RegisterPage() {
     if (data.user) {
       await supabaseClient.from("profiles").upsert({
         id: data.user.id,
+        email: resolvedEmail.includes("@incontro.app") ? null : resolvedEmail,
         name: fullName,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
         age,
+        birth_date: birthDate,
       });
     }
 
