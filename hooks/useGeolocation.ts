@@ -51,7 +51,7 @@ export function useGeolocation(userId: string | null) {
   const checkLocation = useCallback(async (coords: GeolocationCoordinates) => {
     if (!userId) return;
 
-    const { data: venues } = await supabaseClient.from("venues").select("*").eq("is_open", true);
+    const { data: venues } = await supabaseClient.from("venues").select("*");
     if (!venues || venues.length === 0) {
       if (wasInsideRef.current) await deactivatePresence();
       setState(s => ({ ...s, isInsideVenue: false, distance: null, activeVenue: null, isLoading: false }));
