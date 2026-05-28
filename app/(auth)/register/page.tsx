@@ -29,8 +29,9 @@ export default function RegisterPage() {
     setError("");
 
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
+    const resolvedEmail = email.trim() || `${firstName.trim().toLowerCase()}.${Date.now()}@incontro.app`;
     const { data, error: signUpError } = await supabaseClient.auth.signUp({
-      email,
+      email: resolvedEmail,
       password,
       options: { data: { name: fullName, age, birth_date: birthDate } },
     });
@@ -100,10 +101,12 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Email</label>
+            <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>
+              Email <span style={{ color: "rgba(255,255,255,0.25)" }}>(opcional)</span>
+            </label>
             <input
               type="email" value={email} onChange={e => setEmail(e.target.value)}
-              required autoComplete="email" placeholder="tu@email.com"
+              autoComplete="email" placeholder="tu@email.com"
               className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none focus:border-[#8296E3] transition-colors"
               style={inputStyle}
             />
