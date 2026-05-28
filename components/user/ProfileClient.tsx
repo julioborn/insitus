@@ -8,10 +8,15 @@ import Image from "next/image";
 
 interface Props { profileId: string; currentUserId: string }
 
-const inputStyle = {
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.08)",
-};
+const inp = { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" };
+
+function calcAge(birthDate: string | null): number | null {
+  if (!birthDate) return null;
+  const b = new Date(birthDate);
+  const t = new Date();
+  return t.getFullYear() - b.getFullYear() -
+    (t < new Date(t.getFullYear(), b.getMonth(), b.getDate()) ? 1 : 0);
+}
 
 export function ProfileClient({ profileId, currentUserId }: Props) {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -20,18 +25,13 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
   const [saving, setSaving] = useState(false);
   const [ghostMode, setGhostMode] = useState(false);
   const [togglingGhost, setTogglingGhost] = useState(false);
-
   const [form, setForm] = useState({ name: "", bio: "", instagram_handle: "" });
 
   const isOwn = profileId === "me" || profileId === currentUserId;
   const resolvedId = profileId === "me" ? currentUserId : profileId;
 
   useEffect(() => {
-    supabaseClient
-      .from("profiles")
-      .select("*")
-      .eq("id", resolvedId)
-      .single()
+    supabaseClient.from("profiles").select("*").eq("id", resolvedId).single()
       .then(({ data }) => {
         setProfile(data);
         if (data) {
@@ -44,9 +44,9 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
 
   async function toggleGhostMode() {
     setTogglingGhost(true);
-    const newVal = !ghostMode;
-    await supabaseClient.from("profiles").update({ ghost_mode: newVal }).eq("id", currentUserId);
-    setGhostMode(newVal);
+    const val = !ghostMode;
+    await supabaseClient.from("profiles").update({ ghost_mode: val }).eq("id", currentUserId);
+    setGhostMode(val);
     setTogglingGhost(false);
   }
 
@@ -55,9 +55,7 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
     const { data } = await supabaseClient
       .from("profiles")
       .update({ name: form.name, bio: form.bio, instagram_handle: form.instagram_handle })
-      .eq("id", currentUserId)
-      .select()
-      .single();
+      .eq("id", currentUserId).select().single();
     if (data) setProfile(data);
     setSaving(false);
     setEditing(false);
@@ -73,31 +71,21 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
 
   const displayName = profile?.name ?? profile?.first_name ?? "Sin nombre";
   const initial = displayName[0]?.toUpperCase() ?? "?";
-
-  function calcAge(birthDate: string | null): number | null {
-    if (!birthDate) return null;
-    const b = new Date(birthDate);
-    const today = new Date();
-    return today.getFullYear() - b.getFullYear() -
-      (today < new Date(today.getFullYear(), b.getMonth(), b.getDate()) ? 1 : 0);
-  }
   const age = calcAge(profile?.birth_date ?? null);
 
   return (
     <div className="flex flex-col min-h-screen bg-black pb-24">
-      {/* Avatar */}
-      <div className="flex flex-col items-center pt-12 pb-6 px-5">
+
+      {/* Hero — avatar + nombre */}
+      <div className="relative flex flex-col items-center px-5 pt-14 pb-8">
+        {/* Glow detrás del avatar */}
+        <div className="absolute top-10 w-32 h-32 rounded-full opacity-20 blur-2xl"
+          style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }} />
+
         <div className="relative w-24 h-24 rounded-full overflow-hidden mb-4"
-          style={{ border: "2px solid rgba(130,150,227,0.4)" }}>
+          style={{ border: "2.5px solid rgba(130,150,227,0.5)" }}>
           {profile?.avatar_url ? (
-            <Image
-              src={profile.avatar_url}
-              alt={displayName}
-              fill
-              sizes="96px"
-              className="object-cover"
-              unoptimized
-            />
+            <Image src={profile.avatar_url} alt={displayName} fill sizes="96px" className="object-cover" unoptimized />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-white"
               style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
@@ -106,120 +94,154 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
           )}
         </div>
 
-        {!editing ? (
-          <>
+        {!editing && (
+          <div className="flex flex-col items-center gap-1">
             <h1 className="text-xl font-bold text-white">{displayName}</h1>
-            {age !== null && <p className="text-white/40 text-sm mt-0.5">{age} años</p>}
-            {profile?.email && <p className="text-white/30 text-xs mt-1">{profile.email}</p>}
-          </>
-        ) : (
-          <p className="text-white/40 text-xs">Editando perfil</p>
+            {profile?.username && (
+              <p className="text-sm" style={{ color: "rgba(130,150,227,0.8)" }}>@{profile.username}</p>
+            )}
+            <div className="flex items-center gap-3 mt-1">
+              {age !== null && (
+                <span className="text-xs px-2.5 py-1 rounded-full"
+                  style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)" }}>
+                  {age} años
+                </span>
+              )}
+              {ghostMode && (
+                <span className="text-xs px-2.5 py-1 rounded-full"
+                  style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)" }}>
+                  👻 Fantasma
+                </span>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
-      {/* Contenido */}
-      <div className="flex-1 px-5">
-        {editing ? (
-          <div className="flex flex-col gap-4">
+      <div className="flex-1 px-4">
+
+        {/* ── MODO EDICIÓN ── */}
+        {editing && (
+          <div className="flex flex-col gap-3 animate-fade-in">
+            <p className="text-white/40 text-xs uppercase tracking-widest text-center mb-1">Editando perfil</p>
             {[
-              { label: "Nombre completo", key: "name", placeholder: "Tu nombre" },
+              { label: "Nombre completo", key: "name", placeholder: "Tu nombre completo" },
               { label: "Bio", key: "bio", placeholder: "Contá algo sobre vos..." },
-              { label: "Instagram", key: "instagram_handle", placeholder: "@usuario" },
+              { label: "Instagram", key: "instagram_handle", placeholder: "usuario (sin @)" },
             ].map(({ label, key, placeholder }) => (
               <div key={key}>
-                <label className="block text-xs mb-1.5 uppercase tracking-wider text-white/40">{label}</label>
+                <label className="block text-[11px] mb-1.5 uppercase tracking-widest"
+                  style={{ color: "rgba(255,255,255,0.35)" }}>{label}</label>
                 <input
                   value={form[key as keyof typeof form]}
                   onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                   placeholder={placeholder}
-                  className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none focus:border-[#8296E3] transition-colors"
-                  style={inputStyle}
+                  className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none transition-colors"
+                  style={inp}
                 />
               </div>
             ))}
-
             <div className="flex gap-3 mt-2">
-              <button
-                onClick={() => setEditing(false)}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold text-white/60"
-                style={inputStyle}
-              >
+              <button onClick={() => setEditing(false)}
+                className="flex-1 py-3 rounded-2xl text-sm font-medium"
+                style={{ ...inp, color: "rgba(255,255,255,0.5)" }}>
                 Cancelar
               </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}
-              >
+              <button onClick={handleSave} disabled={saving}
+                className="flex-1 py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
                 {saving ? "Guardando..." : "Guardar"}
               </button>
             </div>
           </div>
-        ) : (
-          <div className="flex flex-col gap-3">
+        )}
+
+        {/* ── VISTA NORMAL ── */}
+        {!editing && (
+          <div className="flex flex-col gap-3 animate-fade-in">
+
+            {/* Bio */}
             {profile?.bio && (
-              <div className="px-4 py-3 rounded-xl" style={inputStyle}>
-                <p className="text-white/40 text-xs mb-1 uppercase tracking-wider">Bio</p>
-                <p className="text-white text-sm leading-relaxed">{profile.bio}</p>
+              <div className="rounded-2xl px-4 py-3.5" style={inp}>
+                <p className="text-[10px] uppercase tracking-widest mb-1.5"
+                  style={{ color: "rgba(255,255,255,0.3)" }}>Bio</p>
+                <p className="text-white/80 text-sm leading-relaxed">{profile.bio}</p>
               </div>
             )}
+
+            {/* Instagram */}
             {profile?.instagram_handle && (
-              <div className="px-4 py-3 rounded-xl" style={inputStyle}>
-                <p className="text-white/40 text-xs mb-1 uppercase tracking-wider">Instagram</p>
-                <p className="text-[#8296E3] text-sm">@{profile.instagram_handle}</p>
+              <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3" style={inp}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <rect x="2" y="2" width="20" height="20" rx="5" stroke="#8296E3" strokeWidth="1.8"/>
+                  <circle cx="12" cy="12" r="4" stroke="#8296E3" strokeWidth="1.8"/>
+                  <circle cx="17.5" cy="6.5" r="1" fill="#8296E3"/>
+                </svg>
+                <p className="text-sm" style={{ color: "#8296E3" }}>@{profile.instagram_handle}</p>
               </div>
             )}
 
             {isOwn && (
-              <div className="flex flex-col gap-2 mt-4">
-                {/* Switch modo fantasma */}
-                <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={inputStyle}>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">👻</span>
+              <>
+                {/* Modo fantasma */}
+                <div className="rounded-2xl px-4 py-3.5 flex items-center justify-between" style={inp}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
+                      style={{ background: "rgba(255,255,255,0.07)" }}>
+                      👻
+                    </div>
                     <div>
                       <p className="text-white text-sm font-medium">Modo fantasma</p>
-                      <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
-                        {ghostMode ? "No aparecés ni ves a nadie" : "Sos visible para los demás"}
+                      <p className="text-[11px] mt-0.5"
+                        style={{ color: ghostMode ? "rgba(130,150,227,0.8)" : "rgba(255,255,255,0.3)" }}>
+                        {ghostMode ? "Invisible para los demás" : "Sos visible para todos"}
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={toggleGhostMode}
-                    disabled={togglingGhost}
-                    className="relative w-12 h-6 rounded-full transition-all disabled:opacity-50 flex-shrink-0 ml-3"
-                    style={{ background: ghostMode ? "linear-gradient(135deg, #8296E3, #4762C7)" : "rgba(255,255,255,0.15)" }}
-                  >
-                    <span className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all shadow"
+                  <button onClick={toggleGhostMode} disabled={togglingGhost}
+                    className="relative w-11 h-6 rounded-full transition-all disabled:opacity-40 flex-shrink-0"
+                    style={{ background: ghostMode ? "linear-gradient(135deg, #8296E3, #4762C7)" : "rgba(255,255,255,0.12)" }}>
+                    <span className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all"
                       style={{ left: ghostMode ? "calc(100% - 22px)" : "2px" }} />
                   </button>
                 </div>
 
-                <button
-                  onClick={() => setEditing(true)}
-                  className="w-full py-3 rounded-xl text-sm font-semibold text-white"
-                  style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}
-                >
+                {/* Separador */}
+                <div className="my-1" style={{ height: "1px", background: "rgba(255,255,255,0.06)" }} />
+
+                {/* Editar */}
+                <button onClick={() => setEditing(true)}
+                  className="w-full py-3.5 rounded-2xl text-sm font-semibold text-white flex items-center justify-center gap-2"
+                  style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
                   Editar perfil
                 </button>
-                <button
-                  onClick={signOut}
-                  className="w-full py-3 rounded-xl text-sm font-semibold"
-                  style={{ ...inputStyle, color: "rgba(255,100,100,0.8)" }}
-                >
-                  Cerrar sesión
-                </button>
 
+                {/* Admin */}
                 {profile?.role === "superadmin" && (
-                  <a
-                    href="/admin"
-                    className="w-full py-3 rounded-xl text-sm font-semibold text-center block"
-                    style={{ background: "rgba(130,150,227,0.15)", border: "1px solid rgba(130,150,227,0.3)", color: "#8296E3" }}
-                  >
-                    ⚙️ Panel de administración
+                  <a href="/admin"
+                    className="w-full py-3.5 rounded-2xl text-sm font-semibold text-center flex items-center justify-center gap-2"
+                    style={{ background: "rgba(130,150,227,0.1)", border: "1px solid rgba(130,150,227,0.25)", color: "#8296E3" }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                    Panel de administración
                   </a>
                 )}
-              </div>
+
+                {/* Cerrar sesión */}
+                <button onClick={signOut}
+                  className="w-full py-3.5 rounded-2xl text-sm font-medium flex items-center justify-center gap-2"
+                  style={{ ...inp, color: "rgba(255,80,80,0.7)" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+                  </svg>
+                  Cerrar sesión
+                </button>
+              </>
             )}
           </div>
         )}
