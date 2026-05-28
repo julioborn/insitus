@@ -13,13 +13,22 @@ export function MapPicker({ lat, lng, radius, onChange }: Props) {
   const mapRef = useRef<unknown>(null);
   const markerRef = useRef<unknown>(null);
   const circleRef = useRef<unknown>(null);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
+    if (!containerRef.current || initializedRef.current) return;
 
-    // Leaflet must be loaded client-side only
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((containerRef.current as any)._leaflet_id) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (containerRef.current as any)._leaflet_id = null;
+    }
+
+    initializedRef.current = true;
+
     import("leaflet").then(L => {
-      // Fix default icon paths broken by webpack
+      if (!containerRef.current) return;
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
       L.Icon.Default.mergeOptions({
@@ -28,27 +37,38 @@ export function MapPicker({ lat, lng, radius, onChange }: Props) {
         shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
       });
 
-      const map = L.map(containerRef.current!, {
-        center: [lat || -34.6037, lng || -58.3816],
+      const center: [number, number] = [lat || -34.6037, lng || -58.3816];
+
+      const map = L.map(containerRef.current, {
+        center,
         zoom: 18,
         zoomControl: true,
+        maxZoom: 22,
       });
 
-      // Satélite Esri (gratuito, sin API key)
+      // Satélite Esri — maxNativeZoom 19, el mapa escala los tiles por encima de eso
       L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        { attribution: "Esri", maxZoom: 20 }
+        {
+          attribution: "Esri",
+          maxZoom: 22,
+          maxNativeZoom: 19,
+        }
       ).addTo(map);
 
-      // Marcador draggable
-      const marker = L.marker([lat || -34.6037, lng || -58.3816], { draggable: true }).addTo(map);
+      // Capa de etiquetas encima del satélite para orientarse
+      L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+        { maxZoom: 22, maxNativeZoom: 19, opacity: 0.7 }
+      ).addTo(map);
 
-      // Círculo del radio
-      const circle = L.circle([lat || -34.6037, lng || -58.3816], {
+      const marker = L.marker(center, { draggable: true }).addTo(map);
+
+      const circle = L.circle(center, {
         radius,
         color: "#8296E3",
         fillColor: "#8296E3",
-        fillOpacity: 0.15,
+        fillOpacity: 0.2,
         weight: 2,
       }).addTo(map);
 
@@ -70,6 +90,7 @@ export function MapPicker({ lat, lng, radius, onChange }: Props) {
         mapRef.current = null;
         markerRef.current = null;
         circleRef.current = null;
+        initializedRef.current = false;
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,13 +99,11 @@ export function MapPicker({ lat, lng, radius, onChange }: Props) {
   // Actualizar círculo cuando cambia el radio
   useEffect(() => {
     if (!circleRef.current) return;
-    import("leaflet").then(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (circleRef.current as any).setRadius(radius);
-    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (circleRef.current as any).setRadius(radius);
   }, [radius]);
 
-  // Centrar mapa si cambian las coords desde fuera (nueva dirección buscada)
+  // Re-centrar cuando cambia lat/lng desde búsqueda externa
   useEffect(() => {
     if (!mapRef.current || !lat || !lng) return;
     import("leaflet").then(L => {
@@ -95,20 +114,19 @@ export function MapPicker({ lat, lng, radius, onChange }: Props) {
       (markerRef.current as any)?.setLatLng(latlng);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (circleRef.current as any)?.setLatLng(latlng);
-      onChange(lat, lng, radius);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lat, lng]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5">
       <div
         ref={containerRef}
         className="w-full rounded-2xl overflow-hidden"
         style={{ height: "260px", border: "1px solid rgba(255,255,255,0.1)" }}
       />
       <p className="text-[11px] text-center" style={{ color: "rgba(255,255,255,0.3)" }}>
-        Arrastrá el marcador para ajustar la ubicación exacta
+        Arrastrá el marcador · el círculo azul muestra el área de detección
       </p>
     </div>
   );
