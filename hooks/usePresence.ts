@@ -7,12 +7,13 @@ export interface PresenceWithProfile extends Presence {
   profiles: Profile;
 }
 
-export function usePresence(venueId: string | null) {
+export function usePresence(venueId: string | null, currentUserId?: string) {
   const [presences, setPresences] = useState<PresenceWithProfile[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!venueId) { setPresences([]); setIsLoading(false); return; }
+    if (!venueId) { setPresences([]); setTotalCount(0); setIsLoading(false); return; }
 
     const fetchPresences = async () => {
       const { data } = await supabaseClient
@@ -20,7 +21,12 @@ export function usePresence(venueId: string | null) {
         .select("*, profiles(*)")
         .eq("venue_id", venueId)
         .eq("is_active", true);
-      setPresences((data as PresenceWithProfile[]) ?? []);
+
+      const all = (data as PresenceWithProfile[]) ?? [];
+      setTotalCount(all.length);
+      // Excluir usuarios en modo fantasma de la lista visible
+      const visible = all.filter(p => !p.profiles?.ghost_mode);
+      setPresences(visible);
       setIsLoading(false);
     };
 
@@ -28,13 +34,12 @@ export function usePresence(venueId: string | null) {
 
     const channel = supabaseClient
       .channel(`presences:${venueId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "presences", filter: `venue_id=eq.${venueId}` }, () => {
-        fetchPresences();
-      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "presences", filter: `venue_id=eq.${venueId}` }, fetchPresences)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, fetchPresences)
       .subscribe();
 
     return () => { supabaseClient.removeChannel(channel); };
-  }, [venueId]);
+  }, [venueId, currentUserId]);
 
-  return { presences, isLoading };
+  return { presences, totalCount, isLoading };
 }

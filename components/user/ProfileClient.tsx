@@ -18,6 +18,8 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [ghostMode, setGhostMode] = useState(false);
+  const [togglingGhost, setTogglingGhost] = useState(false);
 
   const [form, setForm] = useState({ name: "", bio: "", instagram_handle: "" });
 
@@ -32,10 +34,21 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
       .single()
       .then(({ data }) => {
         setProfile(data);
-        if (data) setForm({ name: data.name ?? "", bio: data.bio ?? "", instagram_handle: data.instagram_handle ?? "" });
+        if (data) {
+          setForm({ name: data.name ?? "", bio: data.bio ?? "", instagram_handle: data.instagram_handle ?? "" });
+          setGhostMode(!!data.ghost_mode);
+        }
         setLoading(false);
       });
   }, [resolvedId]);
+
+  async function toggleGhostMode() {
+    setTogglingGhost(true);
+    const newVal = !ghostMode;
+    await supabaseClient.from("profiles").update({ ghost_mode: newVal }).eq("id", currentUserId);
+    setGhostMode(newVal);
+    setTogglingGhost(false);
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -151,6 +164,28 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
 
             {isOwn && (
               <div className="flex flex-col gap-2 mt-4">
+                {/* Switch modo fantasma */}
+                <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={inputStyle}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">👻</span>
+                    <div>
+                      <p className="text-white text-sm font-medium">Modo fantasma</p>
+                      <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+                        {ghostMode ? "No aparecés ni ves a nadie" : "Sos visible para los demás"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={toggleGhostMode}
+                    disabled={togglingGhost}
+                    className="relative w-12 h-6 rounded-full transition-all disabled:opacity-50 flex-shrink-0 ml-3"
+                    style={{ background: ghostMode ? "linear-gradient(135deg, #8296E3, #4762C7)" : "rgba(255,255,255,0.15)" }}
+                  >
+                    <span className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all shadow"
+                      style={{ left: ghostMode ? "calc(100% - 22px)" : "2px" }} />
+                  </button>
+                </div>
+
                 <button
                   onClick={() => setEditing(true)}
                   className="w-full py-3 rounded-xl text-sm font-semibold text-white"
