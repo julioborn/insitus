@@ -89,13 +89,12 @@ interface NominatimResult {
 }
 
 async function uploadVenueImage(file: File): Promise<string | null> {
-  const { supabaseClient } = await import("@/lib/supabase");
-  const ext = file.name.split(".").pop();
-  const path = `${Date.now()}.${ext}`;
-  const { error } = await supabaseClient.storage.from("venues").upload(path, file, { upsert: true });
-  if (error) { console.error(error); return null; }
-  const { data } = supabaseClient.storage.from("venues").getPublicUrl(path);
-  return data.publicUrl;
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+  if (!res.ok) { console.error(await res.text()); return null; }
+  const data = await res.json();
+  return data.url ?? null;
 }
 
 export function AdminClient() {
@@ -356,7 +355,8 @@ export function AdminClient() {
                   {/* Nombre + badge */}
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+                        style={{ border: "2px solid rgba(130,150,227,0.3)" }}>
                         {venue.logo_url ? (
                           <img src={venue.logo_url} alt={venue.name} className="w-full h-full object-cover" />
                         ) : (
