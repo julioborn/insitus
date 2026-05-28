@@ -12,7 +12,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [age, setAge] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +20,10 @@ export default function RegisterPage() {
     e.preventDefault();
     if (password !== confirmPassword) { setError("Las contraseñas no coinciden."); return; }
     if (password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres."); return; }
-    if (parseInt(age) < 18) { setError("Debés tener al menos 18 años."); return; }
+    const birth = new Date(birthDate);
+    const today = new Date();
+    const age = today.getFullYear() - birth.getFullYear() - (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate()) ? 1 : 0);
+    if (age < 18) { setError("Debés tener al menos 18 años."); return; }
 
     setLoading(true);
     setError("");
@@ -29,7 +32,7 @@ export default function RegisterPage() {
     const { error: signUpError } = await supabaseClient.auth.signUp({
       email,
       password,
-      options: { data: { name: fullName, age: parseInt(age) } },
+      options: { data: { name: fullName, age, birth_date: birthDate } },
     });
 
     setLoading(false);
@@ -76,12 +79,13 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Edad</label>
+            <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Fecha de nacimiento</label>
             <input
-              type="number" value={age} onChange={e => setAge(e.target.value)}
-              required autoComplete="off" placeholder="18+"
+              type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)}
+              required autoComplete="bday"
+              max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split("T")[0]}
               className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none focus:border-[#8296E3] transition-colors"
-              style={inputStyle}
+              style={{ ...inputStyle, colorScheme: "dark" }}
             />
           </div>
 
