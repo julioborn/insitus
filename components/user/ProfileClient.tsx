@@ -3,13 +3,24 @@ import { useState, useEffect } from "react";
 import { supabaseClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/supabase";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { signOut } from "@/lib/auth.client";
 import Image from "next/image";
 
 interface Props { profileId: string; currentUserId: string }
 
+const inputStyle = {
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.08)",
+};
+
 export function ProfileClient({ profileId, currentUserId }: Props) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [form, setForm] = useState({ name: "", bio: "", instagram_handle: "" });
+
   const isOwn = profileId === "me" || profileId === currentUserId;
   const resolvedId = profileId === "me" ? currentUserId : profileId;
 
@@ -21,9 +32,23 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
       .single()
       .then(({ data }) => {
         setProfile(data);
+        if (data) setForm({ name: data.name ?? "", bio: data.bio ?? "", instagram_handle: data.instagram_handle ?? "" });
         setLoading(false);
       });
   }, [resolvedId]);
+
+  async function handleSave() {
+    setSaving(true);
+    const { data } = await supabaseClient
+      .from("profiles")
+      .update({ name: form.name, bio: form.bio, instagram_handle: form.instagram_handle })
+      .eq("id", currentUserId)
+      .select()
+      .single();
+    if (data) setProfile(data);
+    setSaving(false);
+    setEditing(false);
+  }
 
   if (loading) {
     return (
@@ -33,47 +58,116 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
     );
   }
 
-  if (!profile) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-black gap-3">
-        <span className="text-4xl">👤</span>
-        <p className="text-white font-medium">Perfil no encontrado</p>
-        <p className="text-white/40 text-sm text-center px-8">
-          Completá tu perfil para que otros te puedan ver.
-        </p>
-        <BottomNav />
-      </div>
-    );
-  }
+  const displayName = profile?.name ?? profile?.first_name ?? "Sin nombre";
+  const initial = displayName[0]?.toUpperCase() ?? "?";
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
-      <div className="relative h-72">
-        {profile.avatar_url ? (
-          <Image src={profile.avatar_url} alt={profile.name ?? ""} fill className="object-cover" />
+    <div className="flex flex-col min-h-screen bg-black pb-24">
+      {/* Avatar */}
+      <div className="flex flex-col items-center pt-12 pb-6 px-5">
+        <div className="relative w-24 h-24 rounded-full overflow-hidden mb-4"
+          style={{ border: "2px solid rgba(130,150,227,0.4)" }}>
+          {profile?.avatar_url ? (
+            <Image
+              src={profile.avatar_url}
+              alt={displayName}
+              fill
+              sizes="96px"
+              className="object-cover"
+              unoptimized
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-white"
+              style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+              {initial}
+            </div>
+          )}
+        </div>
+
+        {!editing ? (
+          <>
+            <h1 className="text-xl font-bold text-white">{displayName}</h1>
+            {profile?.age && <p className="text-white/40 text-sm mt-0.5">{profile.age} años</p>}
+            {profile?.email && <p className="text-white/30 text-xs mt-1">{profile.email}</p>}
+          </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
-            <span className="text-7xl text-white/30">{(profile.name ?? "?")[0].toUpperCase()}</span>
-          </div>
+          <p className="text-white/40 text-xs">Editando perfil</p>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
       </div>
 
-      <div className="px-5 -mt-6 pb-28">
-        <h1 className="text-2xl font-bold text-white">{profile.name ?? "Sin nombre"}</h1>
-        {profile.age && <p className="text-white/40 text-sm mt-0.5">{profile.age} años</p>}
-        {profile.bio && <p className="text-white/70 text-sm mt-4 leading-relaxed">{profile.bio}</p>}
-        {profile.instagram_handle && (
-          <p className="text-[#8296E3] text-sm mt-3">@{profile.instagram_handle}</p>
-        )}
+      {/* Contenido */}
+      <div className="flex-1 px-5">
+        {editing ? (
+          <div className="flex flex-col gap-4">
+            {[
+              { label: "Nombre completo", key: "name", placeholder: "Tu nombre" },
+              { label: "Bio", key: "bio", placeholder: "Contá algo sobre vos..." },
+              { label: "Instagram", key: "instagram_handle", placeholder: "@usuario" },
+            ].map(({ label, key, placeholder }) => (
+              <div key={key}>
+                <label className="block text-xs mb-1.5 uppercase tracking-wider text-white/40">{label}</label>
+                <input
+                  value={form[key as keyof typeof form]}
+                  onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                  placeholder={placeholder}
+                  className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none focus:border-[#8296E3] transition-colors"
+                  style={inputStyle}
+                />
+              </div>
+            ))}
 
-        {isOwn && (
-          <button
-            className="mt-6 w-full py-3 rounded-xl text-sm font-semibold text-white"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
-          >
-            Editar perfil
-          </button>
+            <div className="flex gap-3 mt-2">
+              <button
+                onClick={() => setEditing(false)}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold text-white/60"
+                style={inputStyle}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}
+              >
+                {saving ? "Guardando..." : "Guardar"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {profile?.bio && (
+              <div className="px-4 py-3 rounded-xl" style={inputStyle}>
+                <p className="text-white/40 text-xs mb-1 uppercase tracking-wider">Bio</p>
+                <p className="text-white text-sm leading-relaxed">{profile.bio}</p>
+              </div>
+            )}
+            {profile?.instagram_handle && (
+              <div className="px-4 py-3 rounded-xl" style={inputStyle}>
+                <p className="text-white/40 text-xs mb-1 uppercase tracking-wider">Instagram</p>
+                <p className="text-[#8296E3] text-sm">@{profile.instagram_handle}</p>
+              </div>
+            )}
+
+            {isOwn && (
+              <div className="flex flex-col gap-2 mt-4">
+                <button
+                  onClick={() => setEditing(true)}
+                  className="w-full py-3 rounded-xl text-sm font-semibold text-white"
+                  style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}
+                >
+                  Editar perfil
+                </button>
+                <button
+                  onClick={signOut}
+                  className="w-full py-3 rounded-xl text-sm font-semibold"
+                  style={{ ...inputStyle, color: "rgba(255,100,100,0.8)" }}
+                >
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
