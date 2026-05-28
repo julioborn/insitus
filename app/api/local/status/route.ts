@@ -38,7 +38,7 @@ export async function PUT(req: NextRequest) {
   const body = await req.json();
   const { venue_id, ...updates } = body;
 
-  const allowed = ["name", "address", "lat", "lng", "radius_meters", "open_days", "open_time", "close_time", "logo_url"];
+  const allowed = ["name", "address", "lat", "lng", "radius_meters", "open_days", "open_time", "close_time", "logo_url", "zone"];
   const safeUpdates = Object.fromEntries(Object.entries(updates).filter(([k]) => allowed.includes(k)));
 
   const { data, error } = await supabaseAdmin
