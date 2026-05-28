@@ -3,7 +3,6 @@ import { useGeolocation } from "@/hooks/useGeolocation";
 import { usePresence } from "@/hooks/usePresence";
 import { UserCard } from "@/components/user/UserCard";
 import { BottomNav } from "@/components/ui/BottomNav";
-import Image from "next/image";
 
 interface Props { userId: string }
 

@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useMessages } from "@/hooks/useRealtime";
 import { supabaseClient } from "@/lib/supabase";
-import { BottomNav } from "@/components/ui/BottomNav";
 import Link from "next/link";
 
 interface Props { matchId: string; userId: string }
