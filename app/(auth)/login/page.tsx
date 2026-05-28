@@ -58,7 +58,7 @@ export default function LoginPage() {
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-sm">@</span>
               <input
-                type="text" value={username} onChange={e => setUsername(e.target.value)}
+                type="text" value={username} onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
                 required autoComplete="username" placeholder="tu_usuario"
                 className="w-full pl-8 pr-4 py-3 rounded-xl bg-white/5 border text-white text-sm outline-none focus:border-[#8296E3] transition-colors"
                 style={{ borderColor: "rgba(255,255,255,0.08)" }}
