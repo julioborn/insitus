@@ -29,49 +29,75 @@ export function UserCard({ profile, currentUserId, venueId }: Props) {
     setLoading(false);
   }
 
+  const displayName = profile.name ?? profile.first_name ?? "Sin nombre";
+  const initial = displayName[0]?.toUpperCase() ?? "?";
+
   return (
     <div
-      className="relative flex flex-col rounded-2xl overflow-hidden aspect-[3/4]"
+      className="flex items-center gap-4 px-4 py-3 rounded-2xl transition-all active:scale-[0.99]"
       style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
     >
-      {/* Avatar */}
-      <Link href={`/profile/${profile.id}`} className="flex-1 relative block">
-        {profile.avatar_url ? (
-          <Image src={profile.avatar_url} alt={profile.name ?? "User"} fill className="object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8296E3]/20 to-[#4762C7]/20">
-            <span className="text-4xl text-white/20">
-              {(profile.name ?? "?")[0].toUpperCase()}
-            </span>
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+      {/* Avatar circular */}
+      <Link href={`/profile/${profile.id}`} className="flex-shrink-0">
+        <div className="relative w-12 h-12 rounded-full overflow-hidden"
+          style={{ border: "1.5px solid rgba(255,255,255,0.12)" }}>
+          {profile.avatar_url ? (
+            <Image
+              src={profile.avatar_url}
+              alt={displayName}
+              fill
+              sizes="48px"
+              className="object-cover"
+              unoptimized
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-lg font-bold text-white"
+              style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+              {initial}
+            </div>
+          )}
+        </div>
       </Link>
 
       {/* Info */}
-      <div className="p-3 flex items-end justify-between">
-        <div className="min-w-0">
-          <p className="text-white text-sm font-semibold truncate">{profile.name ?? "Sin nombre"}</p>
-          {profile.age && <p className="text-white/40 text-xs">{profile.age} años</p>}
-        </div>
+      <Link href={`/profile/${profile.id}`} className="flex-1 min-w-0">
+        <p className="text-white text-sm font-semibold truncate">{displayName}</p>
+        {profile.age && (
+          <p className="text-white/40 text-xs mt-0.5">{profile.age} años</p>
+        )}
+      </Link>
+
+      {/* Like / Match */}
+      {profile.id !== currentUserId && (
         <button
           onClick={handleLike}
-          disabled={liked || loading || profile.id === currentUserId}
-          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
+          disabled={loading}
+          className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
           style={{
-            background: liked ? "linear-gradient(135deg, #8296E3, #4762C7)" : "rgba(255,255,255,0.08)",
+            background: liked
+              ? "linear-gradient(135deg, #8296E3, #4762C7)"
+              : "rgba(255,255,255,0.06)",
+            border: liked ? "none" : "1px solid rgba(255,255,255,0.1)",
           }}
         >
-          <span className="text-base">{matched ? "💫" : liked ? "❤️" : "🤍"}</span>
+          {loading ? (
+            <div className="w-4 h-4 rounded-full border-2 border-white/40 border-t-transparent animate-spin" />
+          ) : matched ? (
+            <span className="text-base">💫</span>
+          ) : liked ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.8"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          )}
         </button>
-      </div>
+      )}
 
+      {/* Badge match */}
       {matched && (
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-          <div className="bg-black/80 rounded-2xl px-4 py-2 animate-fade-in">
-            <p className="text-[#8296E3] text-xs font-bold tracking-wider">¡MATCH!</p>
-          </div>
-        </div>
+        <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full text-white"
+          style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+          MATCH
+        </span>
       )}
     </div>
   );

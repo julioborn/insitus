@@ -146,7 +146,7 @@ export function HomeClient({ userId }: Props) {
                     <p className="text-white/40 text-sm">Esperá a que llegue más gente.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-2">
                     {others.map(p => (
                       <UserCard
                         key={p.user_id}
