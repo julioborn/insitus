@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "@/lib/supabase.server";
 import Image from "next/image";
 import Link from "next/link";
 
 export default async function RootPage() {
-  const session = await auth();
-  if (session?.user) redirect("/home");
+  const session = await getServerSession();
+  if (session) redirect("/home");
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-black px-6">
