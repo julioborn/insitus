@@ -10,13 +10,9 @@ export default async function RootPage() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-black px-6">
       <div className="flex flex-col items-center gap-8 animate-fade-in">
-        <Image src="/iconincontro.png" alt="Incontro" width={96} height={96} className="rounded-2xl" priority />
-
-        <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-[0.15em] text-white">
-            INCONTRO
-          </h1>
-          <p className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+        <div className="flex flex-col items-center gap-4">
+          <Image src="/incontro-banner.png" alt="Incontro" width={260} height={80} className="object-contain" priority />
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
             Conectate con quienes están en el mismo lugar que vos.
           </p>
         </div>
