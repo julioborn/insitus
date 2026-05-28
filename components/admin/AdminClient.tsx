@@ -311,111 +311,14 @@ export function AdminClient() {
             </p>
           </div>
           <button
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => setShowForm(true)}
             className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl text-white"
-            style={{ background: showForm ? "rgba(255,255,255,0.08)" : "linear-gradient(135deg, #8296E3, #4762C7)" }}
+            style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}
           >
-            {showForm ? "✕ Cancelar" : "+ Nuevo"}
+            + Nuevo
           </button>
         </div>
 
-        {/* Formulario nuevo */}
-        {showForm && (
-          <div className="rounded-2xl p-4 mb-5 flex flex-col gap-4 animate-slide-up"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(130,150,227,0.2)" }}>
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-4 rounded-full" style={{ background: "linear-gradient(#8296E3, #4762C7)" }} />
-              <p className="text-white text-sm font-semibold">Nuevo establecimiento</p>
-            </div>
-
-            <ImageUpload preview={formImagePreview}
-              onFile={(file, url) => { setFormImageFile(file); setFormImagePreview(url); }} />
-
-            <Field label="Nombre">
-              <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="Ej: Club Niceto"
-                className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none"
-                style={inputStyle} />
-            </Field>
-
-            <Field label="Dirección">
-              <div className="relative">
-                <input value={addressQuery} onChange={e => onAddressInput(e.target.value)}
-                  placeholder="Buscá el establecimiento..."
-                  className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none pr-10"
-                  style={inputStyle} />
-                {searchingAddress && <div className="absolute right-3 top-3.5 w-4 h-4 rounded-full border-2 border-[#8296E3] border-t-transparent animate-spin" />}
-              </div>
-              {addressResults.length > 0 && (
-                <div className="mt-1 rounded-2xl overflow-hidden" style={{ background: "#111", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  {addressResults.map((r, i) => (
-                    <button key={i} onClick={() => selectAddress(r)}
-                      className="w-full text-left px-4 py-3 text-xs text-white/70 hover:bg-white/5 transition-colors"
-                      style={{ borderBottom: i < addressResults.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
-                      {r.display_name}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {form.lat !== 0 && (
-                <p className="text-xs mt-1.5 flex items-center gap-1" style={{ color: "#4ade80" }}>
-                  <span>✓</span> Ubicación confirmada
-                </p>
-              )}
-            </Field>
-
-            {form.lat !== 0 && (
-              <Field label="Mapa y zona de detección">
-                <MapPicker lat={form.lat} lng={form.lng} radius={form.radius_meters} zone={form.zone}
-                  onChange={(lat, lng, radius, zone) => setForm(f => ({ ...f, lat, lng, radius_meters: radius, zone: zone ?? null }))} />
-              </Field>
-            )}
-
-            <Field label={`Radio de detección · ${form.radius_meters}m`}>
-              <input type="range" min="10" max="300" step="5" value={form.radius_meters}
-                onChange={e => setForm(f => ({ ...f, radius_meters: parseInt(e.target.value) }))}
-                className="w-full accent-[#8296E3] mt-1" />
-              <p className="text-xs mt-1.5" style={{ color: "#8296E3" }}>{getRadiusLabel(form.radius_meters)}</p>
-            </Field>
-
-            <div className="grid grid-cols-2 gap-3">
-              {[{ label: "Abre", key: "open_time" }, { label: "Cierra", key: "close_time" }].map(({ label, key }) => (
-                <Field key={key} label={label}>
-                  <input type="time" value={form[key as "open_time" | "close_time"]}
-                    onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none"
-                    style={{ ...inputStyle, colorScheme: "dark" }} />
-                </Field>
-              ))}
-            </div>
-
-            <Field label="Días">
-              <div className="flex flex-wrap gap-2 mt-1">
-                {Object.entries(DAYS_ES).map(([key, label]) => (
-                  <button key={key} onClick={() => toggleDay(key)}
-                    className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
-                    style={form.open_days.includes(key)
-                      ? { background: "linear-gradient(135deg, #8296E3, #4762C7)", color: "#fff" }
-                      : { ...inputStyle, color: "rgba(255,255,255,0.45)" }}>
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </Field>
-
-            <div className="flex gap-3 pt-1">
-              <button onClick={() => { setShowForm(false); setAddressQuery(""); setAddressResults([]); }}
-                className="flex-1 py-3 rounded-2xl text-sm font-medium" style={{ ...inputStyle, color: "rgba(255,255,255,0.4)" }}>
-                Cancelar
-              </button>
-              <button onClick={handleCreate} disabled={saving || !form.name || !form.lat}
-                className="flex-1 py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-40"
-                style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
-                {saving ? "Creando..." : "Crear local"}
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Lista */}
         {loading ? (
@@ -537,6 +440,112 @@ export function AdminClient() {
           </div>
         )}
       </main>
+
+      {/* Modal nuevo establecimiento */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: "rgba(0,0,0,0.85)" }}>
+          <div className="w-full max-w-sm rounded-t-3xl flex flex-col" style={{ background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.08)", maxHeight: "92vh" }}>
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+              <div className="w-10 h-1 rounded-full" style={{ background: "rgba(255,255,255,0.12)" }} />
+            </div>
+            <div className="flex items-center justify-between px-5 pb-3 pt-1 flex-shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <div>
+                <p className="text-white font-semibold text-sm">Nuevo establecimiento</p>
+                <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>Completá los datos del local</p>
+              </div>
+              <button onClick={() => { setShowForm(false); setAddressQuery(""); setAddressResults([]); setFormImageFile(null); setFormImagePreview(null); }}
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}>
+                ✕
+              </button>
+            </div>
+
+            <div className="overflow-y-auto px-5 py-4 flex flex-col gap-4">
+              <ImageUpload preview={formImagePreview}
+                onFile={(file, url) => { setFormImageFile(file); setFormImagePreview(url); }} />
+
+              <Field label="Nombre">
+                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="Ej: Club Niceto"
+                  className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none"
+                  style={inputStyle} />
+              </Field>
+
+              <Field label="Dirección">
+                <input value={addressQuery} onChange={e => onAddressInput(e.target.value)}
+                  placeholder="Buscá el establecimiento..."
+                  className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none"
+                  style={inputStyle} />
+                {searchingAddress && <p className="text-xs mt-1" style={{ color: "#8296E3" }}>Buscando...</p>}
+                {addressResults.length > 0 && (
+                  <div className="mt-1 rounded-2xl overflow-hidden" style={{ background: "#111", border: "1px solid rgba(255,255,255,0.1)" }}>
+                    {addressResults.map((r, i) => (
+                      <button key={i} onClick={() => selectAddress(r)}
+                        className="w-full text-left px-4 py-3 text-xs text-white/70 hover:bg-white/5 transition-colors"
+                        style={{ borderBottom: i < addressResults.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
+                        {r.display_name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {form.lat !== 0 && <p className="text-xs mt-1.5" style={{ color: "#4ade80" }}>✓ Ubicación confirmada</p>}
+              </Field>
+
+              {form.lat !== 0 && (
+                <Field label="Mapa y zona de detección">
+                  <MapPicker lat={form.lat} lng={form.lng} radius={form.radius_meters} zone={form.zone}
+                    onChange={(lat, lng, radius, zone) => setForm(f => ({ ...f, lat, lng, radius_meters: radius, zone: zone ?? null }))} />
+                </Field>
+              )}
+
+              <Field label={`Radio · ${form.radius_meters}m`}>
+                <input type="range" min="10" max="300" step="5" value={form.radius_meters}
+                  onChange={e => setForm(f => ({ ...f, radius_meters: parseInt(e.target.value) }))}
+                  className="w-full accent-[#8296E3] mt-1" />
+                <p className="text-xs mt-1.5" style={{ color: "#8296E3" }}>{getRadiusLabel(form.radius_meters)}</p>
+              </Field>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[{ label: "Abre", key: "open_time" }, { label: "Cierra", key: "close_time" }].map(({ label, key }) => (
+                  <Field key={key} label={label}>
+                    <input type="time" value={form[key as "open_time" | "close_time"]}
+                      onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none"
+                      style={{ ...inputStyle, colorScheme: "dark" }} />
+                  </Field>
+                ))}
+              </div>
+
+              <Field label="Días">
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {Object.entries(DAYS_ES).map(([key, label]) => (
+                    <button key={key} onClick={() => toggleDay(key)}
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+                      style={form.open_days.includes(key)
+                        ? { background: "linear-gradient(135deg, #8296E3, #4762C7)", color: "#fff" }
+                        : { ...inputStyle, color: "rgba(255,255,255,0.45)" }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+
+              <div className="flex gap-3 pt-1 pb-2">
+                <button onClick={() => { setShowForm(false); setAddressQuery(""); setAddressResults([]); }}
+                  className="flex-1 py-3 rounded-2xl text-sm font-medium"
+                  style={{ ...inputStyle, color: "rgba(255,255,255,0.4)" }}>
+                  Cancelar
+                </button>
+                <button onClick={handleCreate} disabled={saving || !form.name || !form.lat}
+                  className="flex-1 py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-40"
+                  style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                  {saving ? "Creando..." : "Crear local"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal editar */}
       {editingVenue && (
