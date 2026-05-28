@@ -55,7 +55,7 @@ export function AdminClient() {
   const [form, setForm] = useState({
     name: "", address: "", lat: 0, lng: 0,
     radius_meters: 100, open_time: "22:00", close_time: "06:00",
-    open_days: [] as string[],
+    open_days: [] as string[], zone: null as [number,number][] | null,
   });
 
   // Buscador de dirección
@@ -68,7 +68,7 @@ export function AdminClient() {
   const [editForm, setEditForm] = useState({
     name: "", address: "", lat: 0, lng: 0,
     radius_meters: 100, open_time: "22:00", close_time: "06:00",
-    open_days: [] as string[],
+    open_days: [] as string[], zone: null as [number,number][] | null,
   });
   const [editAddressQuery, setEditAddressQuery] = useState("");
   const [editAddressResults, setEditAddressResults] = useState<NominatimResult[]>([]);
@@ -124,7 +124,7 @@ export function AdminClient() {
     if (data.id) {
       setVenues(v => [...v, data]);
       setShowForm(false);
-      setForm({ name: "", address: "", lat: 0, lng: 0, radius_meters: 100, open_time: "22:00", close_time: "06:00", open_days: [] });
+      setForm({ name: "", address: "", lat: 0, lng: 0, radius_meters: 100, open_time: "22:00", close_time: "06:00", open_days: [], zone: null });
       setAddressQuery("");
     }
     setSaving(false);
@@ -141,6 +141,7 @@ export function AdminClient() {
       open_time: venue.open_time ?? "22:00",
       close_time: venue.close_time ?? "06:00",
       open_days: venue.open_days ?? [],
+      zone: (venue.zone as [number,number][] | null) ?? null,
     });
     setEditAddressQuery(venue.address ?? "");
     setEditAddressResults([]);
@@ -295,11 +296,11 @@ export function AdminClient() {
             {form.lat !== 0 && (
               <div>
                 <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>
-                  Ubicación en mapa — arrastrá el marcador para ajustar
+                  Ubicación en mapa
                 </label>
                 <MapPicker
-                  lat={form.lat} lng={form.lng} radius={form.radius_meters}
-                  onChange={(lat, lng) => setForm(f => ({ ...f, lat, lng }))}
+                  lat={form.lat} lng={form.lng} radius={form.radius_meters} zone={form.zone}
+                  onChange={(lat, lng, radius, zone) => setForm(f => ({ ...f, lat, lng, radius_meters: radius, zone: zone ?? null }))}
                 />
               </div>
             )}
@@ -479,13 +480,14 @@ export function AdminClient() {
               {/* Mapa satelital */}
               <div>
                 <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>
-                  Ubicación en mapa — arrastrá el marcador para ajustar
+                  Ubicación en mapa
                 </label>
                 <MapPicker
                   lat={editForm.lat || editingVenue.lat}
                   lng={editForm.lng || editingVenue.lng}
                   radius={editForm.radius_meters}
-                  onChange={(lat, lng) => setEditForm(f => ({ ...f, lat, lng }))}
+                  zone={editForm.zone ?? (editingVenue.zone as [number,number][] | null)}
+                  onChange={(lat, lng, radius, zone) => setEditForm(f => ({ ...f, lat, lng, radius_meters: radius, zone: zone ?? null }))}
                 />
               </div>
 

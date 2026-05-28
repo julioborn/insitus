@@ -15,11 +15,27 @@ export function haversineDistance(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// Ray casting point-in-polygon
+export function isInsidePolygon(lat: number, lng: number, polygon: [number, number][]): boolean {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [yi, xi] = polygon[i];
+    const [yj, xj] = polygon[j];
+    const intersect = ((yi > lat) !== (yj > lat)) &&
+      (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
 export function isInsideVenueRadius(
   userLat: number,
   userLng: number,
-  venue: Pick<Venue, "lat" | "lng" | "radius_meters">
+  venue: Pick<Venue, "lat" | "lng" | "radius_meters" | "zone">
 ): boolean {
+  if (venue.zone && venue.zone.length > 2) {
+    return isInsidePolygon(userLat, userLng, venue.zone);
+  }
   return haversineDistance(userLat, userLng, venue.lat, venue.lng) <= venue.radius_meters;
 }
 
