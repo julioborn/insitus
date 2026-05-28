@@ -14,7 +14,7 @@ export function HomeClient({ userId }: Props) {
   const [viewingPeople, setViewingPeople] = useState(false);
   const [ghostMode, setGhostMode] = useState(false);
 
-  // Cargar estado de ghost mode del perfil
+  // Cargar ghost mode
   useEffect(() => {
     supabaseClient
       .from("profiles")
@@ -24,7 +24,8 @@ export function HomeClient({ userId }: Props) {
       .then(({ data }) => { if (data) setGhostMode(!!data.ghost_mode); });
   }, [userId]);
 
-  const others = presences.filter(p => p.user_id !== userId);
+  // presences ya viene filtrado sin el usuario actual ni fantasmas
+  const others = presences;
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
