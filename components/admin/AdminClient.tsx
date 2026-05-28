@@ -37,6 +37,51 @@ function getRadiusLabel(val: number): string {
 const inputStyle = { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" };
 const labelStyle = { color: "rgba(255,255,255,0.45)" };
 
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-[11px] mb-1.5 uppercase tracking-widest" style={labelStyle}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function ImageUpload({ preview, onFile, label = "Imagen del local" }: {
+  preview: string | null;
+  onFile: (f: File, url: string) => void;
+  label?: string;
+}) {
+  return (
+    <Field label={label}>
+      <label className="block cursor-pointer">
+        <input type="file" accept="image/*" className="hidden"
+          onChange={e => {
+            const f = e.target.files?.[0];
+            if (!f) return;
+            onFile(f, URL.createObjectURL(f));
+          }} />
+        {preview ? (
+          <div className="relative w-full h-36 rounded-2xl overflow-hidden group">
+            <img src={preview} alt="preview" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ background: "rgba(0,0,0,0.6)" }}>
+              <p className="text-white text-xs font-medium">Cambiar imagen</p>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full h-24 rounded-2xl flex flex-col items-center justify-center gap-2"
+            style={{ ...inputStyle, border: "1.5px dashed rgba(255,255,255,0.15)" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.8" strokeLinecap="round">
+              <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>Subir foto</p>
+          </div>
+        )}
+      </label>
+    </Field>
+  );
+}
+
 interface NominatimResult {
   display_name: string;
   lat: string;
@@ -237,44 +282,6 @@ export function AdminClient() {
       setInviteEmail("");
     }
   }
-
-  const ImageUpload = ({
-    preview, onFile, label = "Imagen del local"
-  }: { preview: string | null; onFile: (f: File, url: string) => void; label?: string }) => (
-    <Field label={label}>
-      <label className="block cursor-pointer">
-        <input type="file" accept="image/*" className="hidden"
-          onChange={e => {
-            const f = e.target.files?.[0];
-            if (!f) return;
-            const url = URL.createObjectURL(f);
-            onFile(f, url);
-          }} />
-        {preview ? (
-          <div className="relative w-full h-36 rounded-2xl overflow-hidden group">
-            <img src={preview} alt="preview" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ background: "rgba(0,0,0,0.6)" }}>
-              <p className="text-white text-xs font-medium">Cambiar imagen</p>
-            </div>
-          </div>
-        ) : (
-          <div className="w-full h-24 rounded-2xl flex flex-col items-center justify-center gap-2 transition-colors hover:border-[#8296E3]"
-            style={{ ...inputStyle, border: "1.5px dashed rgba(255,255,255,0.15)" }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>Tocá para subir una foto</p>
-          </div>
-        )}
-      </label>
-    </Field>
-  );
-
-  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div>
-      <label className="block text-[11px] mb-1.5 uppercase tracking-widest" style={labelStyle}>{label}</label>
-      {children}
-    </div>
-  );
 
   return (
     <div className="flex flex-col min-h-screen bg-black pb-10">
