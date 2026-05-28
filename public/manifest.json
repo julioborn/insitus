@@ -1,0 +1,38 @@
+{
+  "name": "Incontro",
+  "short_name": "Incontro",
+  "description": "Conectate con quienes están en el mismo lugar que vos.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "lang": "es",
+  "categories": ["social", "lifestyle"],
+  "icons": [
+    {
+      "src": "/iconincontro.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/iconincontro.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/iconincontro.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/iconincontro.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}

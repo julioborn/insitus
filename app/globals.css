@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg:       #000000;
+  --color-white:    #FFFFFF;
+  --color-primary:  #8296E3;
+  --color-accent:   #4762C7;
+  --gradient-brand: linear-gradient(135deg, #8296E3, #4762C7);
+
+  --background: #000000;
+  --foreground: #FFFFFF;
 }
 
 @theme inline {
@@ -12,15 +18,23 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  background: #000000;
+  color: #FFFFFF;
+  font-family: var(--font-geist-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  height: 100%;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+* {
+  box-sizing: border-box;
 }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(130, 150, 227, 0.3); border-radius: 2px; }
+
+/* Safe area for PWA */
+.safe-top    { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
