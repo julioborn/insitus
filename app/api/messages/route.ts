@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "@/lib/supabase.server";
 import { supabaseAdmin } from "@/lib/supabase.admin";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await getServerSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const uid = session.user.id;
 
   const matchId = req.nextUrl.searchParams.get("matchId");
   if (!matchId) return NextResponse.json({ error: "matchId required" }, { status: 400 });
 
-  // Verify user is part of this match
   const { data: match } = await supabaseAdmin
     .from("matches")
     .select("id")
     .eq("id", matchId)
     .or(`user_a.eq.${uid},user_b.eq.${uid}`)
     .single();
+
   if (!match) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { data, error } = await supabaseAdmin
@@ -26,12 +26,12 @@ export async function GET(req: NextRequest) {
     .order("created_at", { ascending: true });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  return NextResponse.json(data ?? []);
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await getServerSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const uid = session.user.id;
 
   const { matchId, content } = await req.json();
@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
     .eq("is_active", true)
     .or(`user_a.eq.${uid},user_b.eq.${uid}`)
     .single();
+
   if (!match) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { data, error } = await supabaseAdmin

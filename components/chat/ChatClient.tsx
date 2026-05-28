@@ -2,7 +2,16 @@
 import { useState, useRef, useEffect } from "react";
 import { useMessages } from "@/hooks/useRealtime";
 import { supabaseClient } from "@/lib/supabase";
+import Image from "next/image";
 import Link from "next/link";
+
+interface OtherProfile {
+  id: string;
+  name: string | null;
+  first_name: string | null;
+  avatar_url: string | null;
+  username: string | null;
+}
 
 interface Props { matchId: string; userId: string }
 
@@ -10,8 +19,25 @@ export function ChatClient({ matchId, userId }: Props) {
   const { messages, isTyping } = useMessages(matchId);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [other, setOther] = useState<OtherProfile | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cargar perfil del otro usuario
+  useEffect(() => {
+    supabaseClient
+      .from("matches")
+      .select("user_a, user_b, user_a_profile:profiles!matches_user_a_fkey(id,name,first_name,avatar_url,username), user_b_profile:profiles!matches_user_b_fkey(id,name,first_name,avatar_url,username)")
+      .eq("id", matchId)
+      .single()
+      .then(({ data }) => {
+        if (!data) return;
+        const profile = data.user_a === userId
+          ? (data.user_b_profile as unknown as OtherProfile)
+          : (data.user_a_profile as unknown as OtherProfile);
+        setOther(profile);
+      });
+  }, [matchId, userId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -35,25 +61,40 @@ export function ChatClient({ matchId, userId }: Props) {
     setSending(false);
   }
 
+  const displayName = other?.name ?? other?.first_name ?? "Match";
+  const initial = displayName[0]?.toUpperCase() ?? "?";
+
   return (
     <div className="flex flex-col h-screen bg-black">
       {/* Header */}
       <header className="flex items-center gap-3 px-4 pt-12 pb-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         <Link href="/matches" className="text-white/60 text-xl px-1">‹</Link>
-        <div
-          className="w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}
-        >
-          <span className="text-white text-sm font-bold">M</span>
+        <div className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0"
+          style={{ border: "1.5px solid rgba(130,150,227,0.4)" }}>
+          {other?.avatar_url ? (
+            <Image src={other.avatar_url} alt={displayName} fill sizes="36px" className="object-cover" unoptimized />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white"
+              style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+              {initial}
+            </div>
+          )}
         </div>
-        <div>
-          <p className="text-white text-sm font-semibold">Match</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-white text-sm font-semibold truncate">{displayName}</p>
+          {other?.username && <p className="text-white/40 text-xs">@{other.username}</p>}
           {isTyping && <p className="text-[#8296E3] text-xs animate-pulse">Escribiendo...</p>}
         </div>
       </header>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 pb-4">
+      {/* Mensajes */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full gap-2 text-center pb-8">
+            <span className="text-4xl">💬</span>
+            <p className="text-white/40 text-sm">¡Empezá la conversación!</p>
+          </div>
+        )}
         {messages.map(msg => {
           const mine = msg.sender_id === userId;
           return (
@@ -76,7 +117,7 @@ export function ChatClient({ matchId, userId }: Props) {
       {/* Input */}
       <form
         onSubmit={handleSend}
-        className="flex items-center gap-3 px-4 py-3 pb-safe-bottom"
+        className="flex items-center gap-3 px-4 py-3"
         style={{ borderTop: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.9)", backdropFilter: "blur(20px)" }}
       >
         <input
@@ -88,7 +129,7 @@ export function ChatClient({ matchId, userId }: Props) {
         />
         <button
           type="submit" disabled={!text.trim() || sending}
-          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 disabled:opacity-40 transition-opacity"
+          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 disabled:opacity-40"
           style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
