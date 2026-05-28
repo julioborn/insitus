@@ -211,160 +211,146 @@ export function AdminClient() {
     }
   }
 
+  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div>
+      <label className="block text-[11px] mb-1.5 uppercase tracking-widest" style={labelStyle}>{label}</label>
+      {children}
+    </div>
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-black pb-10">
       {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <div>
-          <Image src="/iconincontro.png" alt="Incontro" width={28} height={28} className="rounded-lg mb-1" />
-          <h1 className="text-lg font-bold text-white">Panel Admin</h1>
+      <header className="px-5 pt-12 pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-base font-bold text-white leading-tight">Panel Admin</h1>
+              <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>Incontro</p>
+            </div>
+          </div>
+          <Link href="/home"
+            className="text-xs px-3 py-1.5 rounded-xl font-medium transition-colors"
+            style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            ← App
+          </Link>
         </div>
-        <Link href="/home" className="text-xs text-white/40 hover:text-white/70">← App</Link>
       </header>
 
-      <main className="flex-1 px-5 py-6">
+      <main className="flex-1 px-4 py-5">
+        {/* Título sección + botón */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-white font-semibold">
-            Establecimientos <span className="text-white/30 text-sm">({venues.length})</span>
-          </h2>
+          <div>
+            <h2 className="text-white font-semibold text-sm">Establecimientos</h2>
+            <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
+              {venues.length} {venues.length === 1 ? "lugar registrado" : "lugares registrados"}
+            </p>
+          </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white"
-            style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}
+            className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl text-white"
+            style={{ background: showForm ? "rgba(255,255,255,0.08)" : "linear-gradient(135deg, #8296E3, #4762C7)" }}
           >
-            + Nuevo
+            {showForm ? "✕ Cancelar" : "+ Nuevo"}
           </button>
         </div>
 
-        {/* Formulario */}
+        {/* Formulario nuevo */}
         {showForm && (
-          <div className="rounded-2xl p-4 mb-5 flex flex-col gap-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-white text-sm font-semibold">Nuevo establecimiento</p>
-
-            {/* Nombre */}
-            <div>
-              <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Nombre</label>
-              <input
-                value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="Ej: Club Niceto"
-                className="w-full px-3 py-2.5 rounded-xl text-white text-sm outline-none focus:border-[#8296E3]"
-                style={inputStyle}
-              />
+          <div className="rounded-2xl p-4 mb-5 flex flex-col gap-4 animate-slide-up"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(130,150,227,0.2)" }}>
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-4 rounded-full" style={{ background: "linear-gradient(#8296E3, #4762C7)" }} />
+              <p className="text-white text-sm font-semibold">Nuevo establecimiento</p>
             </div>
 
-            {/* Búsqueda de dirección */}
-            <div className="relative">
-              <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Dirección</label>
-              <div className="relative">
-                <input
-                  value={addressQuery}
-                  onChange={e => onAddressInput(e.target.value)}
-                  placeholder="Buscá el establecimiento..."
-                  className="w-full px-3 py-2.5 rounded-xl text-white text-sm outline-none pr-8"
-                  style={inputStyle}
-                />
-                {searchingAddress && (
-                  <div className="absolute right-3 top-3 w-4 h-4 rounded-full border-2 border-[#8296E3] border-t-transparent animate-spin" />
-                )}
-              </div>
+            <Field label="Nombre">
+              <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                placeholder="Ej: Club Niceto"
+                className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none"
+                style={inputStyle} />
+            </Field>
 
-              {/* Resultados */}
+            <Field label="Dirección">
+              <div className="relative">
+                <input value={addressQuery} onChange={e => onAddressInput(e.target.value)}
+                  placeholder="Buscá el establecimiento..."
+                  className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none pr-10"
+                  style={inputStyle} />
+                {searchingAddress && <div className="absolute right-3 top-3.5 w-4 h-4 rounded-full border-2 border-[#8296E3] border-t-transparent animate-spin" />}
+              </div>
               {addressResults.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 rounded-xl overflow-hidden" style={{ background: "#111", border: "1px solid rgba(255,255,255,0.12)" }}>
+                <div className="mt-1 rounded-2xl overflow-hidden" style={{ background: "#111", border: "1px solid rgba(255,255,255,0.1)" }}>
                   {addressResults.map((r, i) => (
-                    <button
-                      key={i}
-                      onClick={() => selectAddress(r)}
-                      className="w-full text-left px-4 py-3 text-xs text-white/80 hover:bg-white/5 transition-colors"
-                      style={{ borderBottom: i < addressResults.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}
-                    >
+                    <button key={i} onClick={() => selectAddress(r)}
+                      className="w-full text-left px-4 py-3 text-xs text-white/70 hover:bg-white/5 transition-colors"
+                      style={{ borderBottom: i < addressResults.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
                       {r.display_name}
                     </button>
                   ))}
                 </div>
               )}
-
-              {/* Confirmación de coords */}
               {form.lat !== 0 && (
-                <p className="text-xs mt-1.5" style={{ color: "#4ade80" }}>
-                  ✓ Ubicación detectada: {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
+                <p className="text-xs mt-1.5 flex items-center gap-1" style={{ color: "#4ade80" }}>
+                  <span>✓</span> Ubicación confirmada
                 </p>
               )}
-            </div>
+            </Field>
 
-            {/* Mapa satelital */}
             {form.lat !== 0 && (
-              <div>
-                <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>
-                  Ubicación en mapa
-                </label>
-                <MapPicker
-                  lat={form.lat} lng={form.lng} radius={form.radius_meters} zone={form.zone}
-                  onChange={(lat, lng, radius, zone) => setForm(f => ({ ...f, lat, lng, radius_meters: radius, zone: zone ?? null }))}
-                />
-              </div>
+              <Field label="Mapa y zona de detección">
+                <MapPicker lat={form.lat} lng={form.lng} radius={form.radius_meters} zone={form.zone}
+                  onChange={(lat, lng, radius, zone) => setForm(f => ({ ...f, lat, lng, radius_meters: radius, zone: zone ?? null }))} />
+              </Field>
             )}
 
-            {/* Radio con slider */}
-            <div>
-              <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>
-                Radio de detección
-              </label>
-              <input
-                type="range" min="10" max="300" step="5"
-                value={form.radius_meters}
+            <Field label={`Radio de detección · ${form.radius_meters}m`}>
+              <input type="range" min="10" max="300" step="5" value={form.radius_meters}
                 onChange={e => setForm(f => ({ ...f, radius_meters: parseInt(e.target.value) }))}
-                className="w-full accent-[#8296E3]"
-              />
-              <p className="text-xs mt-1" style={{ color: "#8296E3" }}>
-                {getRadiusLabel(form.radius_meters)}
-              </p>
-            </div>
+                className="w-full accent-[#8296E3] mt-1" />
+              <p className="text-xs mt-1.5" style={{ color: "#8296E3" }}>{getRadiusLabel(form.radius_meters)}</p>
+            </Field>
 
-            {/* Horarios */}
             <div className="grid grid-cols-2 gap-3">
               {[{ label: "Abre", key: "open_time" }, { label: "Cierra", key: "close_time" }].map(({ label, key }) => (
-                <div key={key}>
-                  <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>{label}</label>
-                  <input
-                    type="time" value={form[key as "open_time" | "close_time"]}
+                <Field key={key} label={label}>
+                  <input type="time" value={form[key as "open_time" | "close_time"]}
                     onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl text-white text-sm outline-none"
-                    style={{ ...inputStyle, colorScheme: "dark" }}
-                  />
-                </div>
+                    className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none"
+                    style={{ ...inputStyle, colorScheme: "dark" }} />
+                </Field>
               ))}
             </div>
 
-            {/* Días */}
-            <div>
-              <label className="block text-xs mb-2 uppercase tracking-wider" style={labelStyle}>Días</label>
-              <div className="flex flex-wrap gap-2">
+            <Field label="Días">
+              <div className="flex flex-wrap gap-2 mt-1">
                 {Object.entries(DAYS_ES).map(([key, label]) => (
-                  <button
-                    key={key} onClick={() => toggleDay(key)}
-                    className="px-3 py-1 rounded-lg text-xs font-medium transition-all"
+                  <button key={key} onClick={() => toggleDay(key)}
+                    className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
                     style={form.open_days.includes(key)
                       ? { background: "linear-gradient(135deg, #8296E3, #4762C7)", color: "#fff" }
-                      : { ...inputStyle, color: "rgba(255,255,255,0.5)" }}
-                  >
+                      : { ...inputStyle, color: "rgba(255,255,255,0.45)" }}>
                     {label}
                   </button>
                 ))}
               </div>
-            </div>
+            </Field>
 
-            <div className="flex gap-3 mt-1">
-              <button onClick={() => { setShowForm(false); setAddressQuery(""); setAddressResults([]); }} className="flex-1 py-2.5 rounded-xl text-sm text-white/50" style={inputStyle}>
+            <div className="flex gap-3 pt-1">
+              <button onClick={() => { setShowForm(false); setAddressQuery(""); setAddressResults([]); }}
+                className="flex-1 py-3 rounded-2xl text-sm font-medium" style={{ ...inputStyle, color: "rgba(255,255,255,0.4)" }}>
                 Cancelar
               </button>
-              <button
-                onClick={handleCreate}
-                disabled={saving || !form.name || !form.lat}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}
-              >
-                {saving ? "Creando..." : "Crear"}
+              <button onClick={handleCreate} disabled={saving || !form.name || !form.lat}
+                className="flex-1 py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-40"
+                style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                {saving ? "Creando..." : "Crear local"}
               </button>
             </div>
           </div>
@@ -372,43 +358,88 @@ export function AdminClient() {
 
         {/* Lista */}
         {loading ? (
-          <div className="flex justify-center py-12">
+          <div className="flex justify-center py-16">
             <div className="w-8 h-8 rounded-full border-2 border-[#8296E3] border-t-transparent animate-spin" />
           </div>
         ) : venues.length === 0 ? (
-          <p className="text-white/30 text-sm text-center py-12">No hay establecimientos cargados</p>
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.04)" }}>
+              <span className="text-2xl">🏢</span>
+            </div>
+            <p className="text-white/30 text-sm">No hay establecimientos</p>
+            <p className="text-white/20 text-xs">Creá el primero con el botón de arriba</p>
+          </div>
         ) : (
           <div className="flex flex-col gap-3">
             {venues.map(venue => (
-              <div key={venue.id} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-white font-semibold">{venue.name}</p>
-                    {venue.address && <p className="text-white/40 text-xs mt-0.5 leading-relaxed">{venue.address}</p>}
-                    <p className="text-white/30 text-xs mt-1">
-                      {venue.open_time?.slice(0, 5)} – {venue.close_time?.slice(0, 5)}
-                      {" · "}{venue.radius_meters}m
-                    </p>
+              <div key={venue.id} className="rounded-2xl overflow-hidden"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                {/* Top strip */}
+                <div className="h-1 w-full" style={{
+                  background: venue.is_open
+                    ? "linear-gradient(90deg, #4ade80, #22c55e)"
+                    : "rgba(255,255,255,0.08)"
+                }} />
+
+                <div className="p-4">
+                  {/* Nombre + badge */}
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-base font-bold text-white"
+                        style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                        {venue.name[0].toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-white font-semibold text-sm truncate">{venue.name}</p>
+                        {venue.address && (
+                          <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(255,255,255,0.35)" }}>
+                            {venue.address.split(",").slice(0, 2).join(",")}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <span className={`text-[10px] px-2 py-1 rounded-full font-semibold flex-shrink-0 ${
+                      venue.is_open
+                        ? "text-green-400 bg-green-400/10"
+                        : "bg-white/5"
+                    }`} style={{ color: venue.is_open ? undefined : "rgba(255,255,255,0.25)" }}>
+                      {venue.is_open ? "● Abierto" : "○ Cerrado"}
+                    </span>
                   </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${venue.is_open ? "text-green-400 bg-green-400/10" : "text-white/30 bg-white/5"}`}>
-                    {venue.is_open ? "Abierto" : "Cerrado"}
-                  </span>
-                </div>
-                <div className="flex gap-2 mt-1">
-                  <button
-                    onClick={() => openEdit(venue)}
-                    className="flex-1 py-2 rounded-xl text-xs font-medium text-[#8296E3]"
-                    style={{ background: "rgba(130,150,227,0.1)", border: "1px solid rgba(130,150,227,0.2)" }}
-                  >
-                    ✏️ Editar
-                  </button>
-                  <button
-                    onClick={() => setShowInvite(venue.id)}
-                    className="flex-1 py-2 rounded-xl text-xs font-medium text-white/60 hover:text-white transition-colors"
-                    style={inputStyle}
-                  >
-                    👤 Asignar admin
-                  </button>
+
+                  {/* Detalles */}
+                  <div className="flex items-center gap-4 mb-3">
+                    {venue.open_time && venue.close_time && (
+                      <div className="flex items-center gap-1.5">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+                          {venue.open_time.slice(0,5)} – {venue.close_time.slice(0,5)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                      <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+                        {venue.zone ? "Zona personalizada" : `${venue.radius_meters}m radio`}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="flex gap-2">
+                    <button onClick={() => openEdit(venue)}
+                      className="flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
+                      style={{ background: "rgba(130,150,227,0.12)", border: "1px solid rgba(130,150,227,0.2)", color: "#8296E3" }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      Editar
+                    </button>
+                    <button onClick={() => setShowInvite(venue.id)}
+                      className="flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5"
+                      style={{ ...inputStyle, color: "rgba(255,255,255,0.5)" }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      Asignar admin
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -417,71 +448,79 @@ export function AdminClient() {
 
         {/* Resultado invitación */}
         {inviteResult && (
-          <div className="mt-4 rounded-2xl p-4" style={{ background: "rgba(130,150,227,0.1)", border: "1px solid rgba(130,150,227,0.3)" }}>
-            <p className="text-[#8296E3] text-sm font-semibold mb-2">✓ Cuenta creada</p>
-            <p className="text-white/60 text-xs">Email: <span className="text-white">{inviteResult.email}</span></p>
-            <p className="text-white/60 text-xs mt-1">Contraseña temporal: <span className="text-white font-mono">{inviteResult.tempPassword}</span></p>
-            <p className="text-white/30 text-xs mt-2">Enviá estas credenciales al administrador del local.</p>
-            <button onClick={() => setInviteResult(null)} className="mt-2 text-xs text-white/30 hover:text-white/60">Cerrar</button>
+          <div className="mt-4 rounded-2xl p-4" style={{ background: "rgba(74,222,128,0.07)", border: "1px solid rgba(74,222,128,0.2)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 rounded-full bg-green-400/20 flex items-center justify-center">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <p className="text-green-400 text-sm font-semibold">Cuenta creada</p>
+            </div>
+            <div className="rounded-xl p-3 flex flex-col gap-2" style={inputStyle}>
+              <div className="flex justify-between text-xs">
+                <span style={{ color: "rgba(255,255,255,0.4)" }}>Email</span>
+                <span className="text-white">{inviteResult.email}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span style={{ color: "rgba(255,255,255,0.4)" }}>Contraseña temporal</span>
+                <span className="text-white font-mono">{inviteResult.tempPassword}</span>
+              </div>
+            </div>
+            <p className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.25)" }}>Enviá estas credenciales al administrador.</p>
+            <button onClick={() => setInviteResult(null)} className="mt-2 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>Cerrar</button>
           </div>
         )}
       </main>
 
-      {/* Modal editar establecimiento */}
+      {/* Modal editar */}
       {editingVenue && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: "rgba(0,0,0,0.8)" }}>
-          <div className="w-full max-w-sm rounded-t-3xl flex flex-col max-h-[90vh]"
-            style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
-              <p className="text-white font-semibold">Editar establecimiento</p>
-              <button onClick={() => setEditingVenue(null)} className="text-white/40 text-xl">×</button>
+        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: "rgba(0,0,0,0.85)" }}>
+          <div className="w-full max-w-sm rounded-t-3xl flex flex-col" style={{ background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.08)", maxHeight: "92vh" }}>
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+              <div className="w-10 h-1 rounded-full" style={{ background: "rgba(255,255,255,0.12)" }} />
+            </div>
+            <div className="flex items-center justify-between px-5 pb-3 pt-1 flex-shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <div>
+                <p className="text-white font-semibold text-sm">{editingVenue.name}</p>
+                <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>Editar establecimiento</p>
+              </div>
+              <button onClick={() => setEditingVenue(null)}
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}>
+                ✕
+              </button>
             </div>
 
-            <div className="overflow-y-auto px-5 pb-6 flex flex-col gap-4">
-              {/* Nombre */}
-              <div>
-                <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Nombre</label>
+            <div className="overflow-y-auto px-5 py-4 flex flex-col gap-4">
+              <Field label="Nombre">
                 <input value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl text-white text-sm outline-none"
+                  className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none"
                   style={inputStyle} />
-              </div>
+              </Field>
 
-              {/* Dirección */}
-              <div className="relative">
-                <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Dirección</label>
+              <Field label="Dirección">
                 <div className="relative">
                   <input value={editAddressQuery} onChange={e => onEditAddressInput(e.target.value)}
                     placeholder="Buscá la nueva dirección..."
-                    className="w-full px-3 py-2.5 rounded-xl text-white text-sm outline-none pr-8"
+                    className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none pr-10"
                     style={inputStyle} />
-                  {searchingEditAddress && (
-                    <div className="absolute right-3 top-3 w-4 h-4 rounded-full border-2 border-[#8296E3] border-t-transparent animate-spin" />
-                  )}
+                  {searchingEditAddress && <div className="absolute right-3 top-3.5 w-4 h-4 rounded-full border-2 border-[#8296E3] border-t-transparent animate-spin" />}
                 </div>
                 {editAddressResults.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 rounded-xl overflow-hidden" style={{ background: "#111", border: "1px solid rgba(255,255,255,0.12)" }}>
+                  <div className="mt-1 rounded-2xl overflow-hidden" style={{ background: "#111", border: "1px solid rgba(255,255,255,0.1)" }}>
                     {editAddressResults.map((r, i) => (
                       <button key={i} onClick={() => selectEditAddress(r)}
-                        className="w-full text-left px-4 py-3 text-xs text-white/80 hover:bg-white/5"
+                        className="w-full text-left px-4 py-3 text-xs text-white/70 hover:bg-white/5"
                         style={{ borderBottom: i < editAddressResults.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
                         {r.display_name}
                       </button>
                     ))}
                   </div>
                 )}
-                {editForm.lat !== 0 && (
-                  <p className="text-xs mt-1" style={{ color: "#4ade80" }}>✓ Ubicación: {editForm.lat.toFixed(5)}, {editForm.lng.toFixed(5)}</p>
-                )}
-                {editForm.lat === 0 && editAddressQuery && (
-                  <p className="text-xs mt-1 text-white/30">Coordenadas actuales: {editingVenue.lat.toFixed(5)}, {editingVenue.lng.toFixed(5)}</p>
-                )}
-              </div>
+                {editForm.lat !== 0 && <p className="text-xs mt-1.5" style={{ color: "#4ade80" }}>✓ Ubicación actualizada</p>}
+              </Field>
 
-              {/* Mapa satelital */}
-              <div>
-                <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>
-                  Ubicación en mapa
-                </label>
+              <Field label="Mapa y zona de detección">
                 <MapPicker
                   lat={editForm.lat || editingVenue.lat}
                   lng={editForm.lng || editingVenue.lng}
@@ -489,56 +528,50 @@ export function AdminClient() {
                   zone={editForm.zone ?? (editingVenue.zone as [number,number][] | null)}
                   onChange={(lat, lng, radius, zone) => setEditForm(f => ({ ...f, lat, lng, radius_meters: radius, zone: zone ?? null }))}
                 />
-              </div>
+              </Field>
 
-              {/* Radio */}
-              <div>
-                <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Radio de detección</label>
-                <input type="range" min="10" max="300" step="5"
-                  value={editForm.radius_meters}
+              <Field label={`Radio · ${editForm.radius_meters}m`}>
+                <input type="range" min="10" max="300" step="5" value={editForm.radius_meters}
                   onChange={e => setEditForm(f => ({ ...f, radius_meters: parseInt(e.target.value) }))}
-                  className="w-full accent-[#8296E3]" />
-                <p className="text-xs mt-1" style={{ color: "#8296E3" }}>{getRadiusLabel(editForm.radius_meters)}</p>
-              </div>
+                  className="w-full accent-[#8296E3] mt-1" />
+                <p className="text-xs mt-1.5" style={{ color: "#8296E3" }}>{getRadiusLabel(editForm.radius_meters)}</p>
+              </Field>
 
-              {/* Horarios */}
               <div className="grid grid-cols-2 gap-3">
                 {[{ label: "Abre", key: "open_time" as const }, { label: "Cierra", key: "close_time" as const }].map(({ label, key }) => (
-                  <div key={key}>
-                    <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>{label}</label>
+                  <Field key={key} label={label}>
                     <input type="time" value={editForm[key]}
                       onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))}
-                      className="w-full px-3 py-2.5 rounded-xl text-white text-sm outline-none"
+                      className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none"
                       style={{ ...inputStyle, colorScheme: "dark" }} />
-                  </div>
+                  </Field>
                 ))}
               </div>
 
-              {/* Días */}
-              <div>
-                <label className="block text-xs mb-2 uppercase tracking-wider" style={labelStyle}>Días</label>
-                <div className="flex flex-wrap gap-2">
+              <Field label="Días">
+                <div className="flex flex-wrap gap-2 mt-1">
                   {Object.entries(DAYS_ES).map(([key, label]) => (
                     <button key={key} onClick={() => toggleEditDay(key)}
-                      className="px-3 py-1 rounded-lg text-xs font-medium transition-all"
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
                       style={editForm.open_days.includes(key)
                         ? { background: "linear-gradient(135deg, #8296E3, #4762C7)", color: "#fff" }
-                        : { ...inputStyle, color: "rgba(255,255,255,0.5)" }}>
+                        : { ...inputStyle, color: "rgba(255,255,255,0.45)" }}>
                       {label}
                     </button>
                   ))}
                 </div>
-              </div>
+              </Field>
 
-              {/* Botones */}
-              <div className="flex gap-3">
-                <button onClick={() => setEditingVenue(null)} className="flex-1 py-3 rounded-xl text-sm text-white/50" style={inputStyle}>
+              <div className="flex gap-3 pt-1 pb-2">
+                <button onClick={() => setEditingVenue(null)}
+                  className="flex-1 py-3 rounded-2xl text-sm font-medium"
+                  style={{ ...inputStyle, color: "rgba(255,255,255,0.4)" }}>
                   Cancelar
                 </button>
                 <button onClick={handleSaveEdit} disabled={saving || !editForm.name}
-                  className="flex-1 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
+                  className="flex-1 py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-40"
                   style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
-                  {saving ? "Guardando..." : "Guardar cambios"}
+                  {saving ? "Guardando..." : "Guardar"}
                 </button>
               </div>
             </div>
@@ -546,21 +579,40 @@ export function AdminClient() {
         </div>
       )}
 
-      {/* Modal invitar */}
+      {/* Modal asignar admin */}
       {showInvite && (
-        <div className="fixed inset-0 flex items-end justify-center z-50" style={{ background: "rgba(0,0,0,0.7)" }}>
-          <div className="w-full max-w-sm rounded-t-3xl p-6" style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-white font-semibold mb-4">Asignar administrador</p>
-            <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Email del administrador</label>
-            <input
-              type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
-              placeholder="admin@establecimiento.com"
-              className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none mb-4"
-              style={inputStyle}
-            />
-            <div className="flex gap-3">
-              <button onClick={() => { setShowInvite(null); setInviteEmail(""); }} className="flex-1 py-3 rounded-xl text-sm text-white/50" style={inputStyle}>Cancelar</button>
-              <button onClick={handleInvite} disabled={saving || !inviteEmail} className="flex-1 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-50" style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+        <div className="fixed inset-0 flex items-end justify-center z-50" style={{ background: "rgba(0,0,0,0.85)" }}>
+          <div className="w-full max-w-sm rounded-t-3xl p-5" style={{ background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="flex justify-center mb-4">
+              <div className="w-10 h-1 rounded-full" style={{ background: "rgba(255,255,255,0.12)" }} />
+            </div>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ background: "rgba(130,150,227,0.12)", border: "1px solid rgba(130,150,227,0.2)" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8296E3" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Asignar administrador</p>
+                <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+                  {venues.find(v => v.id === showInvite)?.name}
+                </p>
+              </div>
+            </div>
+            <Field label="Email del administrador">
+              <input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
+                placeholder="admin@establecimiento.com" autoFocus
+                className="w-full px-4 py-3 rounded-2xl text-white text-sm outline-none"
+                style={inputStyle} />
+            </Field>
+            <div className="flex gap-3 mt-4">
+              <button onClick={() => { setShowInvite(null); setInviteEmail(""); }}
+                className="flex-1 py-3 rounded-2xl text-sm font-medium"
+                style={{ ...inputStyle, color: "rgba(255,255,255,0.4)" }}>
+                Cancelar
+              </button>
+              <button onClick={handleInvite} disabled={saving || !inviteEmail}
+                className="flex-1 py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-40"
+                style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
                 {saving ? "Creando..." : "Crear cuenta"}
               </button>
             </div>
