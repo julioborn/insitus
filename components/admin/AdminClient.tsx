@@ -47,6 +47,16 @@ export function AdminClient() {
   const [searchingAddress, setSearchingAddress] = useState(false);
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [editingVenue, setEditingVenue] = useState<Venue | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: "", address: "", lat: 0, lng: 0,
+    radius_meters: 100, open_time: "22:00", close_time: "06:00",
+    open_days: [] as string[],
+  });
+  const [editAddressQuery, setEditAddressQuery] = useState("");
+  const [editAddressResults, setEditAddressResults] = useState<NominatimResult[]>([]);
+  const [searchingEditAddress, setSearchingEditAddress] = useState(false);
+  const editSearchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [inviteEmail, setInviteEmail] = useState("");
 
   useEffect(() => {
@@ -99,6 +109,68 @@ export function AdminClient() {
       setShowForm(false);
       setForm({ name: "", address: "", lat: 0, lng: 0, radius_meters: 100, open_time: "22:00", close_time: "06:00", open_days: [] });
       setAddressQuery("");
+    }
+    setSaving(false);
+  }
+
+  function openEdit(venue: Venue) {
+    setEditingVenue(venue);
+    setEditForm({
+      name: venue.name,
+      address: venue.address ?? "",
+      lat: venue.lat,
+      lng: venue.lng,
+      radius_meters: venue.radius_meters,
+      open_time: venue.open_time ?? "22:00",
+      close_time: venue.close_time ?? "06:00",
+      open_days: venue.open_days ?? [],
+    });
+    setEditAddressQuery(venue.address ?? "");
+    setEditAddressResults([]);
+  }
+
+  function onEditAddressInput(val: string) {
+    setEditAddressQuery(val);
+    setEditForm(f => ({ ...f, address: val, lat: 0, lng: 0 }));
+    if (editSearchTimeout.current) clearTimeout(editSearchTimeout.current);
+    if (val.length < 4) { setEditAddressResults([]); return; }
+    editSearchTimeout.current = setTimeout(async () => {
+      setSearchingEditAddress(true);
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&limit=5&addressdetails=1`,
+        { headers: { "Accept-Language": "es" } }
+      );
+      const data: NominatimResult[] = await res.json();
+      setEditAddressResults(data);
+      setSearchingEditAddress(false);
+    }, 600);
+  }
+
+  function selectEditAddress(result: NominatimResult) {
+    setEditAddressQuery(result.display_name);
+    setEditForm(f => ({ ...f, address: result.display_name, lat: parseFloat(result.lat), lng: parseFloat(result.lon) }));
+    setEditAddressResults([]);
+  }
+
+  function toggleEditDay(day: string) {
+    setEditForm(f => ({
+      ...f,
+      open_days: f.open_days.includes(day) ? f.open_days.filter(d => d !== day) : [...f.open_days, day],
+    }));
+  }
+
+  async function handleSaveEdit() {
+    if (!editingVenue) return;
+    setSaving(true);
+    const res = await fetch("/api/admin/locals", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: editingVenue.id, ...editForm }),
+    });
+    const data = await res.json();
+    if (data.id) {
+      setVenues(v => v.map(venue => venue.id === data.id ? data : venue));
+      setEditingVenue(null);
     }
     setSaving(false);
   }
@@ -291,13 +363,22 @@ export function AdminClient() {
                     {venue.is_open ? "Abierto" : "Cerrado"}
                   </span>
                 </div>
-                <button
-                  onClick={() => setShowInvite(venue.id)}
-                  className="w-full py-2 rounded-xl text-xs font-medium text-white/60 hover:text-white transition-colors"
-                  style={inputStyle}
-                >
-                  Asignar administrador
-                </button>
+                <div className="flex gap-2 mt-1">
+                  <button
+                    onClick={() => openEdit(venue)}
+                    className="flex-1 py-2 rounded-xl text-xs font-medium text-[#8296E3]"
+                    style={{ background: "rgba(130,150,227,0.1)", border: "1px solid rgba(130,150,227,0.2)" }}
+                  >
+                    ✏️ Editar
+                  </button>
+                  <button
+                    onClick={() => setShowInvite(venue.id)}
+                    className="flex-1 py-2 rounded-xl text-xs font-medium text-white/60 hover:text-white transition-colors"
+                    style={inputStyle}
+                  >
+                    👤 Asignar admin
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -314,6 +395,111 @@ export function AdminClient() {
           </div>
         )}
       </main>
+
+      {/* Modal editar establecimiento */}
+      {editingVenue && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: "rgba(0,0,0,0.8)" }}>
+          <div className="w-full max-w-sm rounded-t-3xl flex flex-col max-h-[90vh]"
+            style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
+              <p className="text-white font-semibold">Editar establecimiento</p>
+              <button onClick={() => setEditingVenue(null)} className="text-white/40 text-xl">×</button>
+            </div>
+
+            <div className="overflow-y-auto px-5 pb-6 flex flex-col gap-4">
+              {/* Nombre */}
+              <div>
+                <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Nombre</label>
+                <input value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl text-white text-sm outline-none"
+                  style={inputStyle} />
+              </div>
+
+              {/* Dirección */}
+              <div className="relative">
+                <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Dirección</label>
+                <div className="relative">
+                  <input value={editAddressQuery} onChange={e => onEditAddressInput(e.target.value)}
+                    placeholder="Buscá la nueva dirección..."
+                    className="w-full px-3 py-2.5 rounded-xl text-white text-sm outline-none pr-8"
+                    style={inputStyle} />
+                  {searchingEditAddress && (
+                    <div className="absolute right-3 top-3 w-4 h-4 rounded-full border-2 border-[#8296E3] border-t-transparent animate-spin" />
+                  )}
+                </div>
+                {editAddressResults.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 rounded-xl overflow-hidden" style={{ background: "#111", border: "1px solid rgba(255,255,255,0.12)" }}>
+                    {editAddressResults.map((r, i) => (
+                      <button key={i} onClick={() => selectEditAddress(r)}
+                        className="w-full text-left px-4 py-3 text-xs text-white/80 hover:bg-white/5"
+                        style={{ borderBottom: i < editAddressResults.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
+                        {r.display_name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {editForm.lat !== 0 && (
+                  <p className="text-xs mt-1" style={{ color: "#4ade80" }}>✓ Ubicación: {editForm.lat.toFixed(5)}, {editForm.lng.toFixed(5)}</p>
+                )}
+                {editForm.lat === 0 && editAddressQuery && (
+                  <p className="text-xs mt-1 text-white/30">Coordenadas actuales: {editingVenue.lat.toFixed(5)}, {editingVenue.lng.toFixed(5)}</p>
+                )}
+              </div>
+
+              {/* Radio */}
+              <div>
+                <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>Radio de detección</label>
+                <input type="range" min="50" max="300" step="50"
+                  value={editForm.radius_meters}
+                  onChange={e => setEditForm(f => ({ ...f, radius_meters: parseInt(e.target.value) }))}
+                  className="w-full accent-[#8296E3]" />
+                <p className="text-xs mt-1" style={{ color: "#8296E3" }}>{RADIUS_LABELS[editForm.radius_meters]}</p>
+              </div>
+
+              {/* Horarios */}
+              <div className="grid grid-cols-2 gap-3">
+                {[{ label: "Abre", key: "open_time" as const }, { label: "Cierra", key: "close_time" as const }].map(({ label, key }) => (
+                  <div key={key}>
+                    <label className="block text-xs mb-1.5 uppercase tracking-wider" style={labelStyle}>{label}</label>
+                    <input type="time" value={editForm[key]}
+                      onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))}
+                      className="w-full px-3 py-2.5 rounded-xl text-white text-sm outline-none"
+                      style={{ ...inputStyle, colorScheme: "dark" }} />
+                  </div>
+                ))}
+              </div>
+
+              {/* Días */}
+              <div>
+                <label className="block text-xs mb-2 uppercase tracking-wider" style={labelStyle}>Días</label>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(DAYS_ES).map(([key, label]) => (
+                    <button key={key} onClick={() => toggleEditDay(key)}
+                      className="px-3 py-1 rounded-lg text-xs font-medium transition-all"
+                      style={editForm.open_days.includes(key)
+                        ? { background: "linear-gradient(135deg, #8296E3, #4762C7)", color: "#fff" }
+                        : { ...inputStyle, color: "rgba(255,255,255,0.5)" }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Botones */}
+              <div className="flex gap-3">
+                <button onClick={() => setEditingVenue(null)} className="flex-1 py-3 rounded-xl text-sm text-white/50" style={inputStyle}>
+                  Cancelar
+                </button>
+                <button onClick={handleSaveEdit} disabled={saving || !editForm.name}
+                  className="flex-1 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                  {saving ? "Guardando..." : "Guardar cambios"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal invitar */}
       {showInvite && (
