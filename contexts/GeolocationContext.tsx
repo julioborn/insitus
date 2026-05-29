@@ -25,11 +25,15 @@ export function GeolocationProvider({ userId, children }: { userId: string; chil
     isInsideVenue: false, activeVenue: null, distance: null, isLoading: true, error: null,
   });
 
-  const watchIdRef     = useRef<number | null>(null);
-  const presenceIdRef  = useRef<string | null>(null);
-  const wasInsideRef   = useRef(false);
-  const venuesRef      = useRef<Venue[]>([]);
-  const lastFetchRef   = useRef(0);
+  const watchIdRef       = useRef<number | null>(null);
+  const presenceIdRef    = useRef<string | null>(null);
+  const wasInsideRef     = useRef(false);
+  const venuesRef        = useRef<Venue[]>([]);
+  const lastFetchRef     = useRef(0);
+  const userIdRef        = useRef(userId);
+  const checkLocationRef = useRef<((coords: GeolocationCoordinates) => Promise<void>) | null>(null);
+
+  useEffect(() => { userIdRef.current = userId; }, [userId]);
 
   const loadVenues = useCallback(async () => {
     const now = Date.now();
@@ -47,17 +51,18 @@ export function GeolocationProvider({ userId, children }: { userId: string; chil
   }, []);
 
   const activatePresence = useCallback(async (venue: Venue) => {
+    const uid = userIdRef.current;
     const expires = getVenueCloseDateTime(venue);
     const { data } = await supabaseClient
       .from("presences")
       .upsert(
-        { user_id: userId, venue_id: venue.id, is_active: true, expires_at: expires?.toISOString() ?? null },
+        { user_id: uid, venue_id: venue.id, is_active: true, expires_at: expires?.toISOString() ?? null },
         { onConflict: "user_id,venue_id" }
       )
       .select("id").single();
     if (data) presenceIdRef.current = data.id;
     wasInsideRef.current = true;
-  }, [userId]);
+  }, []);
 
   const checkLocation = useCallback(async (coords: GeolocationCoordinates) => {
     await loadVenues();
@@ -89,6 +94,10 @@ export function GeolocationProvider({ userId, children }: { userId: string; chil
     }
   }, [loadVenues, activatePresence, deactivatePresence]);
 
+  // Mantener ref del callback siempre actualizada sin reiniciar el watchPosition
+  useEffect(() => { checkLocationRef.current = checkLocation; }, [checkLocation]);
+
+  // watchPosition — solo se inicia/detiene cuando cambia userId
   useEffect(() => {
     if (!userId || !navigator.geolocation) {
       setState(s => ({ ...s, error: "Geolocation not supported", isLoading: false }));
@@ -98,7 +107,7 @@ export function GeolocationProvider({ userId, children }: { userId: string; chil
     loadVenues();
 
     watchIdRef.current = navigator.geolocation.watchPosition(
-      pos => checkLocation(pos.coords),
+      pos => checkLocationRef.current?.(pos.coords),
       err => setState(s => ({ ...s, error: err.message, isLoading: false })),
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
     );
@@ -115,7 +124,9 @@ export function GeolocationProvider({ userId, children }: { userId: string; chil
       supabaseClient.removeChannel(channel);
       deactivatePresence();
     };
-  }, [userId, checkLocation, loadVenues, deactivatePresence]);
+  // Solo depende de userId — el callback usa ref para no reiniciar
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   return (
     <GeolocationContext.Provider value={state}>
