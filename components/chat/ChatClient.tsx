@@ -118,7 +118,7 @@ export function ChatClient({ matchId, userId }: Props) {
   const initial = displayName[0]?.toUpperCase() ?? "?";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100dvh", background: "#000", overflow: "hidden" }}>
+    <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", background: "#000", overflow: "hidden" }}>
 
       {/* Header — fijo */}
       <header className="flex-shrink-0 flex items-center gap-3 px-4 pb-3"
