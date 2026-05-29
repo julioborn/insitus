@@ -53,11 +53,11 @@ export function MatchesClient({ userId }: Props) {
     return match.user_a === userId ? match.new_for_a : match.new_for_b;
   }
 
-  const newMatches = matches.filter(m => isNew(m));
-  const chats = matches;
+  const newMatchesCount = matches.filter(m => isNew(m)).length;
   const newMessagesCount = matches.filter(m => m.has_new_message).length;
 
-  const displayed = tab === "matches" ? newMatches : chats;
+  // Ambos tabs muestran todos los matches — el badge solo indica cuáles son nuevos
+  const displayed = matches;
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
@@ -68,7 +68,7 @@ export function MatchesClient({ userId }: Props) {
         {/* Tabs */}
         <div className="flex gap-1">
           {[
-            { key: "matches", label: "Matches", count: newMatches.length },
+            { key: "matches", label: "Matches", count: newMatchesCount },
             { key: "chats",   label: "Chats",   count: newMessagesCount },
           ].map(({ key, label, count }) => (
             <button key={key}
@@ -97,15 +97,9 @@ export function MatchesClient({ userId }: Props) {
           </div>
         ) : displayed.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 gap-3 text-center">
-            <span className="text-4xl">{tab === "matches" ? "💫" : "💬"}</span>
-            <p className="text-white font-medium">
-              {tab === "matches" ? "Sin matches nuevos" : "Sin chats activos"}
-            </p>
-            <p className="text-white/40 text-sm">
-              {tab === "matches"
-                ? "Cuando haya like mutuo aparecerá acá."
-                : "Abrí un match para chatear."}
-            </p>
+            <span className="text-4xl">💫</span>
+            <p className="text-white font-medium">Sin matches todavía</p>
+            <p className="text-white/40 text-sm">Cuando haya like mutuo aparecerá acá.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2">
