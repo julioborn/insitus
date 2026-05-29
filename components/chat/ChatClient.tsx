@@ -16,6 +16,11 @@ interface Message {
 
 interface Props { matchId: string; userId: string }
 
+function formatTime(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
 export function ChatClient({ matchId, userId }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
@@ -28,7 +33,6 @@ export function ChatClient({ matchId, userId }: Props) {
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const matchIdRef = useRef(matchId);
 
-  // Cargar perfiles de ambos usuarios
   useEffect(() => {
     supabaseClient
       .from("matches")
@@ -46,35 +50,15 @@ export function ChatClient({ matchId, userId }: Props) {
         setMyAvatar(meProfile?.avatar_url ?? null);
         setMyName(meProfile?.name ?? meProfile?.first_name ?? "Yo");
       });
-
-    // Resetear badge al ABRIR el chat
     fetch(`/api/messages/clear?matchId=${matchId}`);
   }, [matchId, userId]);
 
-  // Cargar mensajes iniciales
   useEffect(() => {
-    supabaseClient
-      .from("messages")
-      .select("*")
-      .eq("match_id", matchId)
+    supabaseClient.from("messages").select("*").eq("match_id", matchId)
       .order("created_at", { ascending: true })
       .then(({ data }) => { if (data) setMessages(data); });
   }, [matchId]);
 
-  // Al SALIR del chat, borrar mensajes recibidos via API con keepalive
-  useEffect(() => {
-    return () => {
-      fetch("/api/messages/clear", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matchId: matchIdRef.current }),
-        keepalive: true, // sobrevive a la navegación/desmontaje
-      });
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Realtime
   useEffect(() => {
     const channel = supabaseClient
       .channel(`chat:${matchId}`)
@@ -95,13 +79,23 @@ export function ChatClient({ matchId, userId }: Props) {
         typingTimeout.current = setTimeout(() => setIsTyping(false), 2000);
       })
       .subscribe();
-
     return () => { supabaseClient.removeChannel(channel); };
   }, [matchId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isTyping]);
+
+  useEffect(() => {
+    return () => {
+      fetch("/api/messages/clear", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchId: matchIdRef.current }),
+        keepalive: true,
+      });
+    };
+  }, []);
 
   function handleTyping() {
     supabaseClient.channel(`chat:${matchId}`).send({ type: "broadcast", event: "typing", payload: {} });
@@ -124,15 +118,12 @@ export function ChatClient({ matchId, userId }: Props) {
   const initial = displayName[0]?.toUpperCase() ?? "?";
 
   return (
-    <div className="flex flex-col bg-black"
-      style={{ height: "100dvh", maxHeight: "100dvh", overflow: "hidden" }}>
-      {/* Header */}
-      <header className="flex items-center gap-3 px-4 pb-3 flex-shrink-0"
-        style={{
-          paddingTop: "max(env(safe-area-inset-top), 48px)",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-        }}>
-        <Link href="/matches" className="text-white/60 text-xl px-1">‹</Link>
+    <div style={{ display: "flex", flexDirection: "column", height: "100dvh", background: "#000", overflow: "hidden" }}>
+
+      {/* Header — fijo */}
+      <header className="flex-shrink-0 flex items-center gap-3 px-4 pb-3"
+        style={{ paddingTop: "max(env(safe-area-inset-top), 48px)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <Link href="/chats" className="text-white/60 text-xl px-1">‹</Link>
         <div className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0"
           style={{ border: "1.5px solid rgba(130,150,227,0.4)" }}>
           {other?.avatar_url ? (
@@ -145,63 +136,97 @@ export function ChatClient({ matchId, userId }: Props) {
         <div className="flex-1 min-w-0">
           <p className="text-white text-sm font-semibold truncate">{displayName}</p>
           {other?.username && <p className="text-white/40 text-xs">@{other.username}</p>}
-          {isTyping && <p className="text-[#8296E3] text-xs animate-pulse">Escribiendo...</p>}
         </div>
       </header>
 
-      {/* Mensajes — flex-col con justify-end para que arranquen desde abajo */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        <div className="flex flex-col justify-end min-h-full gap-2">
-        {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 gap-2 text-center">
-            <span className="text-3xl">💬</span>
-            <p className="text-white/40 text-sm">¡Empezá la conversación!</p>
-          </div>
-        )}
-        {messages.map((msg, i) => {
-          const mine = msg.sender_id === userId;
-          const nextMsg = messages[i + 1];
-          // Mostrar avatar solo en el último mensaje consecutivo del mismo emisor
-          const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id;
-          const avatarUrl = mine ? myAvatar : other?.avatar_url;
-          const avatarName = mine ? myName : (other?.name ?? other?.first_name ?? "");
-          const avatarInitial = avatarName[0]?.toUpperCase() ?? "?";
+      {/* Mensajes — único área scrolleable */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          {messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-12 gap-2 text-center">
+              <span className="text-3xl">💬</span>
+              <p className="text-white/40 text-sm">¡Empezá la conversación!</p>
+            </div>
+          )}
 
-          return (
-            <div key={msg.id} className={`flex items-end gap-2 ${mine ? "flex-row-reverse" : "flex-row"}`}>
-              {/* Avatar — solo si es el último del grupo */}
-              <div className="w-7 h-7 flex-shrink-0">
-                {isLastInGroup ? (
-                  <div className="relative w-7 h-7 rounded-full overflow-hidden">
-                    {avatarUrl ? (
-                      <Image src={avatarUrl} alt={avatarName} fill sizes="28px" className="object-cover" unoptimized />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-white"
-                        style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
-                        {avatarInitial}
+          {messages.map((msg, i) => {
+            const mine = msg.sender_id === userId;
+            const nextMsg = messages[i + 1];
+            const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id;
+            const avatarUrl = mine ? myAvatar : other?.avatar_url;
+            const avatarName = mine ? myName : (other?.name ?? other?.first_name ?? "");
+            const avatarInitial = avatarName[0]?.toUpperCase() ?? "?";
+
+            return (
+              <div key={msg.id} style={{ display: "flex", flexDirection: "column", alignItems: mine ? "flex-end" : "flex-start" }}>
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 8, flexDirection: mine ? "row-reverse" : "row" }}>
+                  {/* Avatar solo en el último del grupo */}
+                  <div style={{ width: 28, flexShrink: 0 }}>
+                    {isLastInGroup ? (
+                      <div className="relative w-7 h-7 rounded-full overflow-hidden">
+                        {avatarUrl ? (
+                          <Image src={avatarUrl} alt={avatarName} fill sizes="28px" className="object-cover" unoptimized />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-white"
+                            style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                            {avatarInitial}
+                          </div>
+                        )}
                       </div>
-                    )}
+                    ) : null}
                   </div>
-                ) : null}
-              </div>
 
-              <div className="max-w-[70%] px-4 py-2.5 rounded-2xl text-sm"
-                style={mine
-                  ? { background: "linear-gradient(135deg, #8296E3, #4762C7)", color: "#fff", borderBottomRightRadius: "6px" }
-                  : { background: "rgba(255,255,255,0.1)", color: "#fff", borderBottomLeftRadius: "6px" }
-                }>
-                {msg.content}
+                  <div className="max-w-[70%] px-4 py-2.5 rounded-2xl text-sm"
+                    style={mine
+                      ? { background: "linear-gradient(135deg, #8296E3, #4762C7)", color: "#fff", borderBottomRightRadius: 6 }
+                      : { background: "rgba(255,255,255,0.10)", color: "#fff", borderBottomLeftRadius: 6 }
+                    }>
+                    {msg.content}
+                  </div>
+                </div>
+
+                {/* Hora solo en el último del grupo */}
+                {isLastInGroup && (
+                  <p style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", marginTop: 3, marginLeft: mine ? 0 : 36, marginRight: mine ? 36 : 0 }}>
+                    {formatTime(msg.created_at)}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Indicador "escribiendo..." */}
+          {isTyping && (
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+              <div style={{ width: 28, flexShrink: 0 }}>
+                <div className="relative w-7 h-7 rounded-full overflow-hidden">
+                  {other?.avatar_url ? (
+                    <Image src={other.avatar_url} alt={displayName} fill sizes="28px" className="object-cover" unoptimized />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-white"
+                      style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                      {initial}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-1 px-4 py-3 rounded-2xl"
+                style={{ background: "rgba(255,255,255,0.10)", borderBottomLeftRadius: 6 }}>
+                {[0, 1, 2].map(i => (
+                  <span key={i} className="w-1.5 h-1.5 rounded-full bg-white/60"
+                    style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+                ))}
               </div>
             </div>
-          );
-        })}
-        <div ref={bottomRef} />
+          )}
+
+          <div ref={bottomRef} />
         </div>
       </div>
 
-      {/* Input */}
+      {/* Input — fijo */}
       <form onSubmit={handleSend}
-        className="flex items-center gap-3 px-4 pt-3 flex-shrink-0"
+        className="flex-shrink-0 flex items-center gap-3 px-4 pt-3"
         style={{
           paddingBottom: "max(env(safe-area-inset-bottom), 12px)",
           borderTop: "1px solid rgba(255,255,255,0.08)",
