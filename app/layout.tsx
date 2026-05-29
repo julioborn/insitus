@@ -21,8 +21,8 @@ export const metadata: Metadata = {
     title: "Incontro",
   },
   icons: {
-    icon: "/iconincontro.png",
-    apple: "/iconincontro.png",
+    icon: "/icon2.png",
+    apple: "/icon2.png",
   },
   openGraph: {
     title: "Incontro",
@@ -47,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="apple-touch-icon" href="/iconincontro.png" />
+        <link rel="apple-touch-icon" href="/icon2.png" />
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
       </head>
