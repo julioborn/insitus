@@ -142,10 +142,11 @@ export function ChatClient({ matchId, userId }: Props) {
         </div>
       </header>
 
-      {/* Mensajes */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+      {/* Mensajes — flex-col con justify-end para que arranquen desde abajo */}
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="flex flex-col justify-end min-h-full gap-2">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full gap-2 text-center pb-8">
+          <div className="flex flex-col items-center justify-center py-12 gap-2 text-center">
             <span className="text-3xl">💬</span>
             <p className="text-white/40 text-sm">¡Empezá la conversación!</p>
           </div>
@@ -165,6 +166,7 @@ export function ChatClient({ matchId, userId }: Props) {
           );
         })}
         <div ref={bottomRef} />
+        </div>
       </div>
 
       {/* Input */}

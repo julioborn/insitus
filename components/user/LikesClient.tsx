@@ -83,8 +83,8 @@ export function LikesClient({ userId }: { userId: string }) {
                     background: matchIsNew ? "rgba(130,150,227,0.08)" : "rgba(255,255,255,0.05)",
                     border: matchIsNew ? "1px solid rgba(130,150,227,0.25)" : "1px solid rgba(255,255,255,0.07)",
                   }}>
-                  <div className="relative flex-shrink-0">
-                    <div className="w-12 h-12 rounded-full overflow-hidden"
+                  <div className="flex-shrink-0">
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden"
                       style={{ border: "1.5px solid rgba(130,150,227,0.4)" }}>
                       {other?.avatar_url ? (
                         <Image src={other.avatar_url} alt={displayName} fill sizes="48px" className="object-cover" unoptimized />
