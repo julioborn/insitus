@@ -38,5 +38,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon2.png|manifest.json|sw.js|workbox-.*).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|iconofinal.png|manifest.json|sw.js|workbox-.*).*)"],
 };
