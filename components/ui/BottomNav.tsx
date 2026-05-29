@@ -70,17 +70,33 @@ export function BottomNav() {
           <Link key={href} href={href}
             className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all"
             style={{ color: active ? "#8296E3" : "rgba(255,255,255,0.35)" }}>
-            {/* Ícono con badge en esquina superior derecha */}
-            <div className="relative">
+            {/* Ícono con badge */}
+            <div style={{ position: "relative", padding: "6px 6px 0 0", margin: "-6px -6px 0 0" }}>
               <Icon filled={active} />
               {active && (
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
                   style={{ background: "#8296E3" }} />
               )}
               {badge > 0 && (
-                <span
-                  className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white leading-none"
-                  style={{ background: "#FF3B30", boxShadow: "0 0 0 1.5px #000", padding: "0 4px" }}>
+                <span style={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  minWidth: "18px",
+                  height: "18px",
+                  borderRadius: "9px",
+                  background: "#FF3B30",
+                  border: "2px solid #000",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "10px",
+                  fontWeight: "700",
+                  color: "#fff",
+                  padding: "0 4px",
+                  lineHeight: "1",
+                  zIndex: 10,
+                }}>
                   {badge > 9 ? "9+" : badge}
                 </span>
               )}
