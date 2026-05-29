@@ -24,10 +24,7 @@ export function ChatClient({ matchId, userId }: Props) {
   const [other, setOther] = useState<OtherProfile | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const messagesRef = useRef<Message[]>([]);
-
-  // Mantener ref actualizada para acceder en cleanup
-  useEffect(() => { messagesRef.current = messages; }, [messages]);
+  const matchIdRef = useRef(matchId);
 
   // Cargar perfil del otro usuario y marcar mensajes como leídos
   useEffect(() => {
@@ -60,19 +57,18 @@ export function ChatClient({ matchId, userId }: Props) {
       .then(({ data }) => { if (data) setMessages(data); });
   }, [matchId]);
 
-  // Al SALIR del chat, borrar los mensajes del otro usuario
+  // Al SALIR del chat, borrar mensajes recibidos via API con keepalive
   useEffect(() => {
     return () => {
-      const toDelete = messagesRef.current.filter(m => m.sender_id !== userId);
-      if (toDelete.length) {
-        supabaseClient
-          .from("messages")
-          .delete()
-          .in("id", toDelete.map(m => m.id));
-      }
+      fetch("/api/messages/clear", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchId: matchIdRef.current }),
+        keepalive: true, // sobrevive a la navegación/desmontaje
+      });
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, []);
 
   // Realtime
   useEffect(() => {
