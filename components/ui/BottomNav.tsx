@@ -58,7 +58,7 @@ const ITEMS = [
 export function BottomNav() {
   const path = usePathname();
   const userId = useCurrentUserId();
-  const unreadMatches = useUnreadMatches(userId);
+  const { total: unreadTotal } = useUnreadMatches(userId);
 
   return (
     <nav
@@ -84,10 +84,10 @@ export function BottomNav() {
               {active && (
                 <span className="absolute -bottom-1 w-1 h-1 rounded-full" style={{ background: "#8296E3" }} />
               )}
-              {href === "/matches" && unreadMatches > 0 && (
+              {href === "/matches" && unreadTotal > 0 && (
                 <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white px-1"
                   style={{ background: "#FF3B30" }}>
-                  {unreadMatches > 9 ? "9+" : unreadMatches}
+                  {unreadTotal > 9 ? "9+" : unreadTotal}
                 </span>
               )}
             </div>

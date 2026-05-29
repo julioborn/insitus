@@ -12,7 +12,6 @@ interface OtherProfile {
 interface Message {
   id: string; match_id: string; sender_id: string;
   content: string; read_at: string | null; created_at: string;
-  _deleting?: boolean;
 }
 
 interface Props { matchId: string; userId: string }
@@ -25,9 +24,12 @@ export function ChatClient({ matchId, userId }: Props) {
   const [other, setOther] = useState<OtherProfile | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const deleteQueue = useRef<Set<string>>(new Set());
+  const messagesRef = useRef<Message[]>([]);
 
-  // Cargar perfil del otro usuario
+  // Mantener ref actualizada para acceder en cleanup
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+
+  // Cargar perfil del otro usuario y marcar mensajes como leídos
   useEffect(() => {
     supabaseClient
       .from("matches")
@@ -40,32 +42,13 @@ export function ChatClient({ matchId, userId }: Props) {
           : (data.user_a_profile as unknown as OtherProfile);
         setOther(profile);
       });
+
+    // Resetear has_new_message al abrir el chat
+    supabaseClient
+      .from("matches")
+      .update({ has_new_message: false })
+      .eq("id", matchId);
   }, [matchId, userId]);
-
-  // Borrar mensajes vistos (efímeros) — solo los del otro usuario
-  const deleteViewedMessages = useCallback(async (msgs: Message[]) => {
-    const toDelete = msgs.filter(m =>
-      m.sender_id !== userId && !deleteQueue.current.has(m.id)
-    );
-    if (!toDelete.length) return;
-
-    toDelete.forEach(m => deleteQueue.current.add(m.id));
-
-    // Animación de desaparición
-    setMessages(prev => prev.map(m =>
-      toDelete.find(d => d.id === m.id) ? { ...m, _deleting: true } : m
-    ));
-
-    await new Promise(r => setTimeout(r, 600));
-
-    // Borrar de Supabase
-    await supabaseClient
-      .from("messages")
-      .delete()
-      .in("id", toDelete.map(m => m.id));
-
-    setMessages(prev => prev.filter(m => !toDelete.find(d => d.id === m.id)));
-  }, [userId]);
 
   // Cargar mensajes iniciales
   useEffect(() => {
@@ -74,30 +57,31 @@ export function ChatClient({ matchId, userId }: Props) {
       .select("*")
       .eq("match_id", matchId)
       .order("created_at", { ascending: true })
-      .then(({ data }) => {
-        if (!data) return;
-        setMessages(data);
-        // Borrar mensajes del otro al abrir el chat
-        setTimeout(() => deleteViewedMessages(data), 1500);
-      });
-  }, [matchId, deleteViewedMessages]);
+      .then(({ data }) => { if (data) setMessages(data); });
+  }, [matchId]);
 
-  // Realtime — nuevos mensajes y eliminaciones
+  // Al SALIR del chat, borrar los mensajes del otro usuario
+  useEffect(() => {
+    return () => {
+      const toDelete = messagesRef.current.filter(m => m.sender_id !== userId);
+      if (toDelete.length) {
+        supabaseClient
+          .from("messages")
+          .delete()
+          .in("id", toDelete.map(m => m.id));
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
+  // Realtime
   useEffect(() => {
     const channel = supabaseClient
       .channel(`chat:${matchId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
           const newMsg = payload.new as Message;
-          setMessages(prev => {
-            if (prev.find(m => m.id === newMsg.id)) return prev;
-            const updated = [...prev, newMsg];
-            // Si es del otro usuario, borrarlo después de 1.5s
-            if (newMsg.sender_id !== userId) {
-              setTimeout(() => deleteViewedMessages([newMsg]), 1500);
-            }
-            return updated;
-          });
+          setMessages(prev => prev.find(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
         }
       )
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
@@ -113,7 +97,7 @@ export function ChatClient({ matchId, userId }: Props) {
       .subscribe();
 
     return () => { supabaseClient.removeChannel(channel); };
-  }, [matchId, userId, deleteViewedMessages]);
+  }, [matchId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -159,11 +143,6 @@ export function ChatClient({ matchId, userId }: Props) {
           {other?.username && <p className="text-white/40 text-xs">@{other.username}</p>}
           {isTyping && <p className="text-[#8296E3] text-xs animate-pulse">Escribiendo...</p>}
         </div>
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full"
-          style={{ background: "rgba(255,80,80,0.1)", border: "1px solid rgba(255,80,80,0.2)" }}>
-          <span className="text-[10px]">👻</span>
-          <span className="text-[10px] font-medium" style={{ color: "rgba(255,100,100,0.8)" }}>Efímero</span>
-        </div>
       </header>
 
       {/* Mensajes */}
@@ -172,25 +151,18 @@ export function ChatClient({ matchId, userId }: Props) {
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center pb-8">
             <span className="text-3xl">💬</span>
             <p className="text-white/40 text-sm">¡Empezá la conversación!</p>
-            <p className="text-white/20 text-xs">Los mensajes se borran al ser vistos</p>
           </div>
         )}
         {messages.map(msg => {
           const mine = msg.sender_id === userId;
           return (
-            <div key={msg.id}
-              className={`flex ${mine ? "justify-end" : "justify-start"} transition-all duration-500 ${msg._deleting ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
-              <div className="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm relative"
+            <div key={msg.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+              <div className="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm"
                 style={mine
                   ? { background: "linear-gradient(135deg, #8296E3, #4762C7)", color: "#fff", borderBottomRightRadius: "6px" }
                   : { background: "rgba(255,255,255,0.08)", color: "#fff", borderBottomLeftRadius: "6px" }
                 }>
                 {msg.content}
-                {!mine && (
-                  <span className="absolute -bottom-4 left-0 text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>
-                    👁 Se borrará al verlo
-                  </span>
-                )}
               </div>
             </div>
           );
