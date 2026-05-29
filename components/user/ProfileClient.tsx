@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { supabaseClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/supabase";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { signOut } from "@/lib/auth.client";
 import Image from "next/image";
+
+interface Photo { id: string; url: string; position: number }
 
 interface Props { profileId: string; currentUserId: string }
 
@@ -19,7 +22,9 @@ function calcAge(birthDate: string | null): number | null {
 }
 
 export function ProfileClient({ profileId, currentUserId }: Props) {
+  const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -40,6 +45,9 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
         }
         setLoading(false);
       });
+    if (isOwn) {
+      fetch("/api/profile/photos").then(r => r.json()).then(d => setPhotos(Array.isArray(d) ? d : []));
+    }
   }, [resolvedId]);
 
   async function toggleGhostMode() {
@@ -160,6 +168,17 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
         {!editing && (
           <div className="flex flex-col gap-3 animate-fade-in">
 
+            {/* Fotos adicionales */}
+            {photos.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {photos.map(photo => (
+                  <div key={photo.id} className="aspect-square rounded-2xl overflow-hidden">
+                    <img src={photo.url} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Bio */}
             {profile?.bio && (
               <div className="rounded-2xl px-4 py-3.5" style={inp}>
@@ -169,15 +188,76 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
               </div>
             )}
 
-            {/* Instagram */}
-            {profile?.instagram_handle && (
-              <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3" style={inp}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <rect x="2" y="2" width="20" height="20" rx="5" stroke="#8296E3" strokeWidth="1.8"/>
-                  <circle cx="12" cy="12" r="4" stroke="#8296E3" strokeWidth="1.8"/>
-                  <circle cx="17.5" cy="6.5" r="1" fill="#8296E3"/>
-                </svg>
-                <p className="text-sm" style={{ color: "#8296E3" }}>@{profile.instagram_handle}</p>
+            {/* Info chips */}
+            {(profile?.city || profile?.gender) && (
+              <div className="flex flex-wrap gap-2">
+                {profile.city && (
+                  <span className="text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5"
+                    style={inp}>
+                    <span>📍</span><span className="text-white/70">{profile.city}</span>
+                  </span>
+                )}
+                {profile.gender && (
+                  <span className="text-xs px-3 py-1.5 rounded-full"
+                    style={inp}>
+                    <span className="text-white/70 capitalize">{profile.gender}</span>
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Qué buscás */}
+            {profile?.looking_for && profile.looking_for.length > 0 && (
+              <div className="rounded-2xl px-4 py-3.5" style={inp}>
+                <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Buscando</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {profile.looking_for.map(v => (
+                    <span key={v} className="text-xs px-2.5 py-1 rounded-full"
+                      style={{ background: "rgba(130,150,227,0.15)", color: "#8296E3", border: "1px solid rgba(130,150,227,0.25)" }}>
+                      {v}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Gustos musicales */}
+            {profile?.music_genres && profile.music_genres.length > 0 && (
+              <div className="rounded-2xl px-4 py-3.5" style={inp}>
+                <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Música</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {profile.music_genres.map(g => (
+                    <span key={g} className="text-xs px-2.5 py-1 rounded-full"
+                      style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.6)" }}>
+                      {g}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Redes sociales */}
+            {(profile?.instagram_handle || profile?.snapchat_handle || profile?.whatsapp) && (
+              <div className="rounded-2xl px-4 py-3.5 flex flex-col gap-3" style={inp}>
+                <p className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>Redes</p>
+                {profile.instagram_handle && (
+                  <div className="flex items-center gap-2.5">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="#8296E3" strokeWidth="1.8"/><circle cx="12" cy="12" r="4" stroke="#8296E3" strokeWidth="1.8"/><circle cx="17.5" cy="6.5" r="1" fill="#8296E3"/></svg>
+                    <p className="text-sm" style={{ color: "#8296E3" }}>@{profile.instagram_handle}</p>
+                  </div>
+                )}
+                {profile.snapchat_handle && (
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-base">👻</span>
+                    <p className="text-sm text-white/70">@{profile.snapchat_handle}</p>
+                  </div>
+                )}
+                {profile.whatsapp && (
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-base">💬</span>
+                    <p className="text-sm text-white/70">{profile.whatsapp}</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -210,7 +290,7 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
                 <div className="my-1" style={{ height: "1px", background: "rgba(255,255,255,0.06)" }} />
 
                 {/* Editar */}
-                <button onClick={() => setEditing(true)}
+                <button onClick={() => router.push("/settings")}
                   className="w-full py-3.5 rounded-2xl text-sm font-semibold text-white flex items-center justify-center gap-2"
                   style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

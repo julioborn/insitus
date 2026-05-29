@@ -36,8 +36,14 @@ export interface Profile {
   first_name: string | null;
   last_name: string | null;
   birth_date: string | null;
+  city: string | null;
+  gender: "hombre" | "mujer" | "otro" | null;
   bio: string | null;
   instagram_handle: string | null;
+  snapchat_handle: string | null;
+  whatsapp: string | null;
+  music_genres: string[] | null;
+  looking_for: string[] | null;
   avatar_url: string | null;
   push_subscription: object | null;
   created_at: string;
