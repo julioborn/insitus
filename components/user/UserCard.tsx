@@ -61,7 +61,18 @@ export function UserCard({ profile, currentUserId, venueId }: Props) {
 
       {/* Info */}
       <Link href={`/profile/${profile.id}`} className="flex-1 min-w-0">
-        <p className="text-white text-sm font-semibold truncate">{displayName}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-white text-sm font-semibold truncate">{displayName}</p>
+          {profile.gender === "hombre" && (
+            <span className="text-[11px] font-bold flex-shrink-0" style={{ color: "#60a5fa" }}>♂</span>
+          )}
+          {profile.gender === "mujer" && (
+            <span className="text-[11px] font-bold flex-shrink-0" style={{ color: "#f9a8d4" }}>♀</span>
+          )}
+          {profile.gender === "otro" && (
+            <span className="text-[11px] font-bold flex-shrink-0" style={{ color: "#c4b5fd" }}>⚧</span>
+          )}
+        </div>
         {profile.birth_date && (() => {
           const b = new Date(profile.birth_date!);
           const today = new Date();
