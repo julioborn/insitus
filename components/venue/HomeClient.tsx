@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useGeolocation } from "@/hooks/useGeolocation";
+import { useGeoContext } from "@/contexts/GeolocationContext";
 import { usePresence } from "@/hooks/usePresence";
 import { UserCard } from "@/components/user/UserCard";
 import { BottomNav } from "@/components/ui/BottomNav";
@@ -9,7 +9,7 @@ import { supabaseClient } from "@/lib/supabase";
 interface Props { userId: string }
 
 export function HomeClient({ userId }: Props) {
-  const { isInsideVenue, activeVenue, error, isLoading, distance } = useGeolocation(userId);
+  const { isInsideVenue, activeVenue, error, isLoading, distance } = useGeoContext();
   const { presences, totalCount } = usePresence(isInsideVenue && activeVenue ? activeVenue.id : null, userId);
   const [viewingPeople, setViewingPeople] = useState(false);
   const [ghostMode, setGhostMode] = useState(false);

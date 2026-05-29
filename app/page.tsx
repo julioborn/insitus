@@ -12,7 +12,7 @@ export default async function RootPage() {
       <div className="flex flex-col items-center gap-8 animate-fade-in">
         <div className="flex flex-col items-center gap-3">
           <Image src="/iconincontro.png" alt="Incontro" width={96} height={96} className="rounded-2xl" priority />
-          <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "var(--font-libre-baskerville)" }}>Incontro</h1>
+          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-libre-baskerville)" }}>INCONTRO</h1>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
             Conectate con quienes están en el mismo lugar que vos.
           </p>
