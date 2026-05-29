@@ -1,9 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { Libre_Baskerville } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/ui/Providers";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
+const libreBaskerville = Libre_Baskerville({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-libre-baskerville",
+});
 
 export const metadata: Metadata = {
   title: "Incontro",
@@ -36,7 +42,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${geist.variable} h-full`}>
+    <html lang="es" className={`${geist.variable} ${libreBaskerville.variable} h-full`}>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
