@@ -22,11 +22,13 @@ export function ChatClient({ matchId, userId }: Props) {
   const [sending, setSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [other, setOther] = useState<OtherProfile | null>(null);
+  const [myAvatar, setMyAvatar] = useState<string | null>(null);
+  const [myName, setMyName] = useState<string>("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const matchIdRef = useRef(matchId);
 
-  // Cargar perfil del otro usuario
+  // Cargar perfiles de ambos usuarios
   useEffect(() => {
     supabaseClient
       .from("matches")
@@ -34,10 +36,15 @@ export function ChatClient({ matchId, userId }: Props) {
       .eq("id", matchId).single()
       .then(({ data }) => {
         if (!data) return;
-        const profile = data.user_a === userId
+        const otherProfile = data.user_a === userId
           ? (data.user_b_profile as unknown as OtherProfile)
           : (data.user_a_profile as unknown as OtherProfile);
-        setOther(profile);
+        const meProfile = data.user_a === userId
+          ? (data.user_a_profile as unknown as OtherProfile)
+          : (data.user_b_profile as unknown as OtherProfile);
+        setOther(otherProfile);
+        setMyAvatar(meProfile?.avatar_url ?? null);
+        setMyName(meProfile?.name ?? meProfile?.first_name ?? "Yo");
       });
 
     // Resetear badge al ABRIR el chat
@@ -151,14 +158,37 @@ export function ChatClient({ matchId, userId }: Props) {
             <p className="text-white/40 text-sm">¡Empezá la conversación!</p>
           </div>
         )}
-        {messages.map(msg => {
+        {messages.map((msg, i) => {
           const mine = msg.sender_id === userId;
+          const nextMsg = messages[i + 1];
+          // Mostrar avatar solo en el último mensaje consecutivo del mismo emisor
+          const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id;
+          const avatarUrl = mine ? myAvatar : other?.avatar_url;
+          const avatarName = mine ? myName : (other?.name ?? other?.first_name ?? "");
+          const avatarInitial = avatarName[0]?.toUpperCase() ?? "?";
+
           return (
-            <div key={msg.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-              <div className="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm"
+            <div key={msg.id} className={`flex items-end gap-2 ${mine ? "flex-row-reverse" : "flex-row"}`}>
+              {/* Avatar — solo si es el último del grupo */}
+              <div className="w-7 h-7 flex-shrink-0">
+                {isLastInGroup ? (
+                  <div className="relative w-7 h-7 rounded-full overflow-hidden">
+                    {avatarUrl ? (
+                      <Image src={avatarUrl} alt={avatarName} fill sizes="28px" className="object-cover" unoptimized />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-white"
+                        style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                        {avatarInitial}
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="max-w-[70%] px-4 py-2.5 rounded-2xl text-sm"
                 style={mine
                   ? { background: "linear-gradient(135deg, #8296E3, #4762C7)", color: "#fff", borderBottomRightRadius: "6px" }
-                  : { background: "rgba(255,255,255,0.08)", color: "#fff", borderBottomLeftRadius: "6px" }
+                  : { background: "rgba(255,255,255,0.1)", color: "#fff", borderBottomLeftRadius: "6px" }
                 }>
                 {msg.content}
               </div>
