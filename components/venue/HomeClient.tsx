@@ -69,6 +69,13 @@ export function HomeClient({ userId }: Props) {
             <span className="text-4xl">🌙</span>
             <p className="text-white font-medium">No estás en ningún lugar</p>
             <p className="text-white/40 text-sm">Cuando estés cerca de un establecimiento asociado, aparecerá acá.</p>
+            {distance !== null && (
+              <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.2)" }}>
+                {distance < 1000
+                  ? `${Math.round(distance)}m del establecimiento más cercano`
+                  : `${(distance / 1000).toFixed(1)}km del establecimiento más cercano`}
+              </p>
+            )}
           </div>
         )}
 
