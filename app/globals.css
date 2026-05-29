@@ -24,6 +24,8 @@ html, body {
   font-family: var(--font-geist-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
   height: 100%;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: auto;
 }
 
 * {

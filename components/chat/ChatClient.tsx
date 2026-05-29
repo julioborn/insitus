@@ -140,7 +140,7 @@ export function ChatClient({ matchId, userId }: Props) {
       </header>
 
       {/* Mensajes — único área scrolleable */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", justifyContent: "flex-end", overscrollBehavior: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 gap-2 text-center">
