@@ -56,6 +56,13 @@ export async function GET(req: NextRequest) {
           avatar_url: avatar,
         }).eq("id", id);
 
+        // Limpiar presencias viejas de sesiones anteriores
+        await supabaseAdmin
+          .from("presences")
+          .update({ is_active: false })
+          .eq("user_id", id)
+          .eq("is_active", true);
+
         // Si falta username o fecha de nacimiento → completar perfil
         if (!existing.username || !existing.birth_date) {
           return NextResponse.redirect(`${origin}/completar-perfil`);

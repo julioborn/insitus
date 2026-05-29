@@ -46,5 +46,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Usuario o contraseña incorrectos." }, { status: 401 });
   }
 
+  // Limpiar presencias viejas de sesiones anteriores
+  await supabaseAdmin
+    .from("presences")
+    .update({ is_active: false })
+    .eq("user_id", data.user.id)
+    .eq("is_active", true);
+
   return NextResponse.json({ ok: true });
 }
