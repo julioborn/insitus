@@ -117,10 +117,14 @@ export function ChatClient({ matchId, userId }: Props) {
   const initial = displayName[0]?.toUpperCase() ?? "?";
 
   return (
-    <div className="flex flex-col h-screen bg-black">
+    <div className="flex flex-col bg-black"
+      style={{ height: "100dvh", maxHeight: "100dvh", overflow: "hidden" }}>
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 pt-12 pb-3"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+      <header className="flex items-center gap-3 px-4 pb-3 flex-shrink-0"
+        style={{
+          paddingTop: "max(env(safe-area-inset-top), 48px)",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}>
         <Link href="/matches" className="text-white/60 text-xl px-1">‹</Link>
         <div className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0"
           style={{ border: "1.5px solid rgba(130,150,227,0.4)" }}>
@@ -165,8 +169,13 @@ export function ChatClient({ matchId, userId }: Props) {
 
       {/* Input */}
       <form onSubmit={handleSend}
-        className="flex items-center gap-3 px-4 py-3"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.08)", background: "rgba(0,0,0,0.9)", backdropFilter: "blur(20px)" }}>
+        className="flex items-center gap-3 px-4 pt-3 flex-shrink-0"
+        style={{
+          paddingBottom: "max(env(safe-area-inset-bottom), 12px)",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          background: "rgba(0,0,0,0.9)",
+          backdropFilter: "blur(20px)",
+        }}>
         <input value={text}
           onChange={e => { setText(e.target.value); handleTyping(); }}
           placeholder="Escribí un mensaje..."
