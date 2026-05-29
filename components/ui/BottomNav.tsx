@@ -56,8 +56,8 @@ export function BottomNav() {
 
   const ITEMS = [
     { href: "/home",       label: "Inicio",   Icon: HomeIcon,    badge: 0 },
-    { href: "/matches",    label: "Likes",    Icon: LikeIcon,    badge: newMatches || 3 },
-    { href: "/chats",      label: "Mensajes", Icon: ChatIcon,    badge: newMessages || 2 },
+    { href: "/matches",    label: "Likes",    Icon: LikeIcon,    badge: newMatches },
+    { href: "/chats",      label: "Mensajes", Icon: ChatIcon,    badge: newMessages },
     { href: "/profile/me", label: "Perfil",   Icon: ProfileIcon, badge: 0 },
   ];
 
