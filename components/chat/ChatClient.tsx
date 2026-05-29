@@ -26,7 +26,7 @@ export function ChatClient({ matchId, userId }: Props) {
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const matchIdRef = useRef(matchId);
 
-  // Cargar perfil del otro usuario y marcar mensajes como leídos
+  // Cargar perfil del otro usuario
   useEffect(() => {
     supabaseClient
       .from("matches")
@@ -40,11 +40,8 @@ export function ChatClient({ matchId, userId }: Props) {
         setOther(profile);
       });
 
-    // Resetear has_new_message al abrir el chat
-    supabaseClient
-      .from("matches")
-      .update({ has_new_message: false })
-      .eq("id", matchId);
+    // Resetear badge al ABRIR el chat
+    fetch(`/api/messages/clear?matchId=${matchId}`);
   }, [matchId, userId]);
 
   // Cargar mensajes iniciales
