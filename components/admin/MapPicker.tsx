@@ -29,10 +29,11 @@ export function MapPicker({ lat, lng, radius, zone, onChange }: Props) {
 
     const center: [number, number] = [lat || -34.6037, lng || -58.3816];
 
-    Promise.all([
-      import("leaflet"),
-      import("@geoman-io/leaflet-geoman-free"),
-    ]).then(([L]) => {
+    import("leaflet").then(async (L) => {
+      // Geoman necesita L como global antes de importarse
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).L = L.default ?? L;
+      await import("@geoman-io/leaflet-geoman-free");
       if (!containerRef.current) return;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
