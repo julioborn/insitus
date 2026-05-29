@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/supabase.server";
-import { MatchesClient } from "@/components/user/MatchesClient";
+import { LikesClient } from "@/components/user/LikesClient";
 
 export default async function MatchesPage() {
   const session = await getServerSession();
   if (!session) redirect("/login");
-  return <MatchesClient userId={session.user.id} defaultTab="matches" />;
+  return <LikesClient userId={session.user.id} />;
 }
