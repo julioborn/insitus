@@ -51,7 +51,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
       </head>
-      <body className="h-full bg-black text-white antialiased overflow-x-hidden">
+      <body className="h-full bg-black text-white antialiased overflow-x-hidden"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <Providers>{children}</Providers>
       </body>
     </html>

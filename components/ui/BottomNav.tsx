@@ -62,8 +62,15 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 flex items-center justify-around px-2 pb-safe"
-      style={{ background: "rgba(0,0,0,0.92)", backdropFilter: "blur(24px)", borderTop: "1px solid rgba(255,255,255,0.06)", height: "64px", overflow: "visible" }}>
+    <nav className="fixed bottom-0 left-0 right-0 flex items-center justify-around px-2"
+      style={{
+        background: "rgba(0,0,0,0.92)",
+        backdropFilter: "blur(24px)",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        overflow: "visible",
+        paddingBottom: "max(env(safe-area-inset-bottom), 8px)",
+        height: "calc(64px + max(env(safe-area-inset-bottom), 8px))",
+      }}>
       {ITEMS.map(({ href, label, Icon, badge }) => {
         const active = path.startsWith(href);
         return (
