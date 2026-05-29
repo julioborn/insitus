@@ -68,17 +68,19 @@ export function BottomNav() {
         const active = path.startsWith(href);
         return (
           <Link key={href} href={href}
-            className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all"
+            className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all relative"
             style={{ color: active ? "#8296E3" : "rgba(255,255,255,0.35)" }}>
+            {/* Badge ENCIMA del ícono, posicionado respecto al Link */}
+            {badge > 0 && (
+              <span
+                className="absolute top-2 right-3 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1 z-10"
+                style={{ background: "#FF3B30", boxShadow: "0 0 0 2px #000" }}>
+                {badge > 9 ? "9+" : badge}
+              </span>
+            )}
             <div className="relative flex items-center justify-center">
               <Icon filled={active} />
               {active && <span className="absolute -bottom-1 w-1 h-1 rounded-full" style={{ background: "#8296E3" }} />}
-              {badge > 0 && (
-                <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white px-1"
-                  style={{ background: "#FF3B30" }}>
-                  {badge > 9 ? "9+" : badge}
-                </span>
-              )}
             </div>
             <span className="text-[10px] font-medium tracking-wide" style={{ opacity: active ? 1 : 0.7 }}>
               {label}
