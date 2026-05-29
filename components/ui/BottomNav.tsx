@@ -69,38 +69,43 @@ export function BottomNav() {
         return (
           <Link key={href} href={href}
             className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all"
-            style={{ color: active ? "#8296E3" : "rgba(255,255,255,0.35)" }}>
-            {/* Ícono con badge */}
-            <div style={{ position: "relative", padding: "6px 6px 0 0", margin: "-6px -6px 0 0" }}>
-              <Icon filled={active} />
-              {active && (
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-                  style={{ background: "#8296E3" }} />
-              )}
-              {badge > 0 && (
-                <span style={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  minWidth: "18px",
-                  height: "18px",
-                  borderRadius: "9px",
-                  background: "#FF3B30",
-                  border: "2px solid #000",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "10px",
-                  fontWeight: "700",
-                  color: "#fff",
-                  padding: "0 4px",
-                  lineHeight: "1",
-                  zIndex: 10,
-                }}>
-                  {badge > 9 ? "9+" : badge}
-                </span>
-              )}
-            </div>
+            style={{ color: active ? "#8296E3" : "rgba(255,255,255,0.35)", position: "relative" }}>
+            <Icon filled={active} />
+            {active && (
+              <span style={{
+                position: "absolute",
+                bottom: "8px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "4px", height: "4px",
+                borderRadius: "50%",
+                background: "#8296E3",
+              }} />
+            )}
+            {badge > 0 && (
+              <span style={{
+                position: "absolute",
+                top: "8px",
+                left: "calc(50% + 6px)",
+                minWidth: "18px",
+                height: "18px",
+                borderRadius: "9px",
+                background: "#FF3B30",
+                border: "2px solid #000",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "10px",
+                fontWeight: "800",
+                color: "#fff",
+                padding: "0 4px",
+                lineHeight: "1",
+                zIndex: 20,
+                pointerEvents: "none",
+              }}>
+                {badge > 9 ? "9+" : badge}
+              </span>
+            )}
             <span className="text-[10px] font-medium tracking-wide" style={{ opacity: active ? 1 : 0.7 }}>
               {label}
             </span>
