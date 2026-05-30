@@ -52,7 +52,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm animate-fade-in">
         <div className="flex flex-col items-center mb-10">
           <Image src="/iconofinal.png" alt="Insitus" width={56} height={56} className="rounded-xl mb-4" />
-          <h1 className="text-2xl font-bold tracking-[0.15em] text-white">INCONTRO</h1>
+          <h1 className="text-2xl font-bold tracking-[0.15em] text-white">INSITUS</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

@@ -51,7 +51,7 @@ export default function RegisterPage() {
     if (existing) { setLoading(false); setError("Ese nombre de usuario ya está en uso."); return; }
 
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
-    const resolvedEmail = email.trim() || `${username}.${Date.now()}@incontro.app`;
+    const resolvedEmail = email.trim() || `${username}.${Date.now()}@insitus.app`;
 
     const { data, error: signUpError } = await supabaseClient.auth.signUp({
       email: resolvedEmail,
@@ -65,7 +65,7 @@ export default function RegisterPage() {
       await supabaseClient.from("profiles").upsert({
         id: data.user.id,
         username,
-        email: resolvedEmail.includes("@incontro.app") ? null : resolvedEmail,
+        email: resolvedEmail.includes("@insitus.app") ? null : resolvedEmail,
         name: fullName,
         first_name: firstName.trim(),
         last_name: lastName.trim(),
@@ -98,7 +98,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm animate-fade-in">
         <div className="flex flex-col items-center mb-8">
           <Image src="/iconofinal.png" alt="Insitus" width={56} height={56} className="rounded-xl mb-4" />
-          <h1 className="text-2xl font-bold tracking-[0.15em] text-white">INCONTRO</h1>
+          <h1 className="text-2xl font-bold tracking-[0.15em] text-white">INSITUS</h1>
           <p className="mt-1 text-xs" style={labelStyle}>Creá tu cuenta</p>
         </div>
 
