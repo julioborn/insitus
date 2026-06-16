@@ -1,12 +1,13 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 
+// Estos valores son públicos (van en el JS del cliente igual que en firebase-messaging-sw.js)
 const firebaseConfig = {
-  apiKey:            process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain:        process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId:         process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket:     process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId:             process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey:            "AIzaSyCYgB05SNVU-Bo40eWuE31pMRg80gQ1x8Y",
+  authDomain:        "insitus-e0beb.firebaseapp.com",
+  projectId:         "insitus-e0beb",
+  storageBucket:     "insitus-e0beb.firebasestorage.app",
+  messagingSenderId: "1015369738643",
+  appId:             "1:1015369738643:web:6a98019ee1a8f3a0e82066",
 };
 
 export const firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();

@@ -23,7 +23,7 @@ export function useFCMToken(userId: string | null) {
         });
 
         const token = await getToken(messaging, {
-          vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+          vapidKey: "BCFmcp7D_p_vMhSH6e0ceqHxaoBY_QEAv5e6Fj2t5RdLL2gGFJ-Ed5dxO3kBKFnsb4zBmV6pJmydIxPz_OZsna0",
           serviceWorkerRegistration: swReg,
         });
 
