@@ -17,15 +17,11 @@ export async function sendPushNotification({ token, title, body, url = "/home", 
 
     await messaging.send({
       token,
-      notification: { title, body },
-      data: { url, tag },
+      // Data-only: sin campo "notification" para evitar que FCM y el SW
+      // muestren dos notificaciones al mismo tiempo.
+      // onBackgroundMessage (SW) y onMessage (FCMProvider) leen de data.
+      data: { url, tag, title, body, icon: iconUrl },
       webpush: {
-        notification: {
-          icon:     iconUrl,
-          badge:    iconUrl,
-          tag,
-          renotify: true,
-        },
         fcmOptions: { link: `${appUrl}${url}` },
       },
       apns: {

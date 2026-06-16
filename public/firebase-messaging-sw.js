@@ -14,10 +14,12 @@ const messaging = firebase.messaging();
 
 // Notificaciones en background (app cerrada o en segundo plano)
 messaging.onBackgroundMessage((payload) => {
-  const { title = "Insitus", body = "" } = payload.notification ?? {};
+  const title = payload.data?.title ?? payload.notification?.title ?? "Insitus";
+  const body  = payload.data?.body  ?? payload.notification?.body  ?? "";
+  const icon  = payload.data?.icon  ?? "/iconofinal.png";
   self.registration.showNotification(title, {
     body,
-    icon:      "/iconofinal.png",
+    icon,
     badge:     "/iconofinal.png",
     tag:       payload.data?.tag ?? "insitus-notification",
     renotify:  true,

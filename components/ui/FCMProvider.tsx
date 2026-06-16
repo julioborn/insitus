@@ -20,8 +20,8 @@ export function FCMProvider({ userId }: { userId: string }) {
         const messaging = getMessaging(firebaseApp);
 
         unsubscribe = onMessage(messaging, async (payload) => {
-          const title = payload.notification?.title ?? "Insitus";
-          const body  = payload.notification?.body  ?? "";
+          const title = payload.data?.title ?? payload.notification?.title ?? "Insitus";
+          const body  = payload.data?.body  ?? payload.notification?.body  ?? "";
           const data  = payload.data ?? {};
 
           try {
