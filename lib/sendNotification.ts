@@ -1,4 +1,4 @@
-import { fcmAdmin } from "@/lib/firebase-admin";
+import { getAdminMessaging } from "@/lib/firebase-admin";
 
 interface Payload {
   token: string;
@@ -10,18 +10,22 @@ interface Payload {
 
 export async function sendPushNotification({ token, title, body, url = "/home", tag = "insitus" }: Payload) {
   try {
-    await fcmAdmin.send({
+    const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? "https://insitus.vercel.app";
+    const iconUrl = `${appUrl}/iconofinal.png`;
+    const messaging = getAdminMessaging();
+
+    await messaging.send({
       token,
       notification: { title, body },
       data: { url, tag },
       webpush: {
         notification: {
-          icon:      "/iconofinal.png",
-          badge:     "/iconofinal.png",
+          icon:     iconUrl,
+          badge:    iconUrl,
           tag,
-          renotify:  true,
+          renotify: true,
         },
-        fcmOptions: { link: url },
+        fcmOptions: { link: `${appUrl}${url}` },
       },
       apns: {
         payload: {
@@ -33,7 +37,7 @@ export async function sendPushNotification({ token, title, body, url = "/home", 
         },
       },
     });
-  } catch {
-    // Token expirado o inválido — fallo silencioso
+  } catch (err) {
+    console.error("[FCM] sendPushNotification error:", err);
   }
 }
