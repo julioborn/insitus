@@ -4,19 +4,37 @@ import { firebaseApp } from "@/lib/firebase";
 
 export type NotifPermission = "default" | "granted" | "denied" | "unsupported";
 
+function isCapacitorNative(): boolean {
+  return typeof window !== "undefined" && !!(window as any).Capacitor?.isNativePlatform?.();
+}
+
 export function useNotificationPermission() {
   const [permission, setPermission] = useState<NotifPermission>("default");
   const [loading, setLoading] = useState(false);
   const swRegRef = useRef<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !("Notification" in window)) {
+    if (typeof window === "undefined") return;
+
+    if (isCapacitorNative()) {
+      // En app nativa: chequeamos el permiso via plugin de Capacitor
+      import("@capacitor/push-notifications").then(({ PushNotifications }) => {
+        PushNotifications.checkPermissions().then((status) => {
+          if (status.receive === "granted") setPermission("granted");
+          else if (status.receive === "denied") setPermission("denied");
+          else setPermission("default");
+        });
+      }).catch(() => setPermission("unsupported"));
+      return;
+    }
+
+    // Flujo web
+    if (!("Notification" in window)) {
       setPermission("unsupported");
       return;
     }
     setPermission(Notification.permission as NotifPermission);
 
-    // Pre-registrar el SW en background para que esté listo al presionar Activar
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/firebase-messaging-sw.js", {
@@ -32,9 +50,21 @@ export function useNotificationPermission() {
     setLoading(true);
 
     try {
+      if (isCapacitorNative()) {
+        const { PushNotifications } = await import("@capacitor/push-notifications");
+        const result = await PushNotifications.requestPermissions();
+        if (result.receive === "granted") {
+          setPermission("granted");
+          await PushNotifications.register();
+        } else {
+          setPermission(result.receive === "denied" ? "denied" : "default");
+        }
+        setLoading(false);
+        return;
+      }
+
       // ⚠️ requestPermission() DEBE ser la primera operación async
-      // para que iOS y Android reconozcan el gesto del usuario y
-      // muestren el diálogo nativo del sistema operativo.
+      // para que iOS y Android reconozcan el gesto del usuario
       const result = await Notification.requestPermission();
       setPermission(result as NotifPermission);
 
@@ -43,7 +73,6 @@ export function useNotificationPermission() {
         return;
       }
 
-      // A partir de acá ya tenemos permiso — podemos hacer el setup de Firebase
       const { getMessaging, getToken } = await import("firebase/messaging");
       const messaging = getMessaging(firebaseApp);
 

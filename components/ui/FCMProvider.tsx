@@ -6,11 +6,10 @@ import { firebaseApp } from "@/lib/firebase";
 export function FCMProvider({ userId }: { userId: string }) {
   useFCMToken(userId);
 
-  // Notificaciones en primer plano (app abierta)
-  // onBackgroundMessage del SW solo corre cuando la app está cerrada/en background.
-  // Cuando está abierta, FCM entrega el mensaje al SDK y hay que mostrarlo manualmente.
+  // Notificaciones en primer plano (solo en web — en nativo el plugin Capacitor lo maneja)
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if ((window as any).Capacitor?.isNativePlatform?.()) return;
     if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
 
     let unsubscribe: (() => void) | undefined;

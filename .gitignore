@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Capacitor native platforms (cada máquina mantiene la suya localmente)
+/android/
+/ios/
+
+# Keystore de firma (nunca al repositorio)
+*.keystore
+*.jks
