@@ -10,7 +10,7 @@ interface Payload {
 
 export async function sendPushNotification({ token, title, body, url = "/home", tag = "insitus" }: Payload) {
   try {
-    const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? "https://insitus.vercel.app";
+    const appUrl  = (process.env.NEXTAUTH_URL ?? "http://localhost:3000").replace(/\/$/, "");
     const iconUrl = `${appUrl}/iconofinal.png`;
     const messaging = getAdminMessaging();
 
