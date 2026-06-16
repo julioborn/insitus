@@ -72,8 +72,8 @@ export async function POST(req: NextRequest) {
   if (recipientToken) {
     await sendPushNotification({
       token: recipientToken,
-      title: senderName,
-      body:  content.trim().length > 80 ? content.trim().slice(0, 80) + "…" : content.trim(),
+      title: "Insitus",
+      body:  `${senderName} te envió un mensaje`,
       url:   `/chat/${matchId}`,
       tag:   `chat-${matchId}`,
     });

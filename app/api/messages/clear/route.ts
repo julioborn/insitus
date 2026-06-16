@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "@/lib/supabase.server";
 import { supabaseAdmin } from "@/lib/supabase.admin";
 
-// Al ABRIR el chat — resetea solo el unread del usuario actual (receptor)
+// Al ABRIR el chat — borra los mensajes recibidos de DB (leídos = borrados) y resetea unread
 export async function GET(req: NextRequest) {
   const session = await getServerSession();
   if (!session) return NextResponse.json({ ok: false });
@@ -19,8 +19,17 @@ export async function GET(req: NextRequest) {
 
   if (!match) return NextResponse.json({ ok: false });
 
-  // Resetear solo el campo del receptor (quien abre el chat)
-  const field = match.user_a === uid ? "unread_for_a" : "unread_for_b";
+  const otherId = match.user_a === uid ? match.user_b : match.user_a;
+  const field   = match.user_a === uid ? "unread_for_a" : "unread_for_b";
+
+  // Borrar de DB los mensajes del otro (el receptor los acaba de leer)
+  await supabaseAdmin
+    .from("messages")
+    .delete()
+    .eq("match_id", matchId)
+    .eq("sender_id", otherId);
+
+  // Resetear badge de no leídos
   await supabaseAdmin
     .from("matches")
     .update({ [field]: false })

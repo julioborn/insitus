@@ -50,13 +50,16 @@ export function ChatClient({ matchId, userId }: Props) {
         setMyAvatar(meProfile?.avatar_url ?? null);
         setMyName(meProfile?.name ?? meProfile?.first_name ?? "Yo");
       });
-    fetch(`/api/messages/clear?matchId=${matchId}`);
   }, [matchId, userId]);
 
   useEffect(() => {
+    // Cargar mensajes primero, LUEGO borrarlos de la DB (leídos = desaparecen)
     supabaseClient.from("messages").select("*").eq("match_id", matchId)
       .order("created_at", { ascending: true })
-      .then(({ data }) => { if (data) setMessages(data); });
+      .then(({ data }) => {
+        if (data) setMessages(data);
+        fetch(`/api/messages/clear?matchId=${matchId}`);
+      });
   }, [matchId]);
 
   useEffect(() => {
@@ -66,11 +69,6 @@ export function ChatClient({ matchId, userId }: Props) {
         (payload) => {
           const newMsg = payload.new as Message;
           setMessages(prev => prev.find(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
-        }
-      )
-      .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
-        (payload) => {
-          setMessages(prev => prev.filter(m => m.id !== (payload.old as Message).id));
         }
       )
       .on("broadcast", { event: "typing" }, () => {
