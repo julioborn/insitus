@@ -9,9 +9,10 @@ interface Payload {
 }
 
 export async function sendPushNotification({ token, title, body, url = "/home", tag = "insitus" }: Payload) {
+  const appUrl  = (process.env.NEXTAUTH_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const iconUrl = `${appUrl}/iconofinal.png`;
+
   try {
-    const appUrl  = (process.env.NEXTAUTH_URL ?? "http://localhost:3000").replace(/\/$/, "");
-    const iconUrl = `${appUrl}/iconofinal.png`;
     const messaging = getAdminMessaging();
 
     await messaging.send({
@@ -37,7 +38,9 @@ export async function sendPushNotification({ token, title, body, url = "/home", 
         },
       },
     });
+
+    console.log(`[FCM] ✓ Enviado: "${title}" → token …${token.slice(-8)}`);
   } catch (err) {
-    console.error("[FCM] sendPushNotification error:", err);
+    console.error(`[FCM] ✗ Error al enviar "${title}":`, err);
   }
 }
