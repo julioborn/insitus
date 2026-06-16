@@ -5,6 +5,7 @@ import { supabaseClient } from "@/lib/supabase";
 import type { Profile } from "@/lib/supabase";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { signOut } from "@/lib/auth.client";
+import { useNotificationPermission } from "@/hooks/useNotificationPermission";
 import Image from "next/image";
 
 interface Photo { id: string; url: string; position: number }
@@ -32,6 +33,7 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
   const [togglingGhost, setTogglingGhost] = useState(false);
   const [form, setForm] = useState({ name: "", bio: "", instagram_handle: "" });
 
+  const { permission: notifPermission, loading: notifLoading, enable: enableNotif } = useNotificationPermission();
   const isOwn = profileId === "me" || profileId === currentUserId;
   const resolvedId = profileId === "me" ? currentUserId : profileId;
 
@@ -263,6 +265,56 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
 
             {isOwn && (
               <>
+                {/* Notificaciones */}
+                {notifPermission !== "unsupported" && (
+                  <div className="rounded-2xl px-4 py-3.5 flex items-center justify-between" style={inp}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                        style={{ background: notifPermission === "granted" ? "rgba(130,150,227,0.15)" : "rgba(255,255,255,0.07)" }}>
+                        {notifPermission === "granted" ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="#8296E3"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                        ) : notifPermission === "denied" ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M20 18.69L7.84 6.14 5.27 3.49 4 4.76l2.2 2.2C6.08 7.49 6 8 6 8.5V15l-2 2v1h13.73l2 2L21 18.69zM12 22c1.11 0 2-.89 2-2h-4c0 1.11.89 2 2 2zm6-7.32V8.5c0-3.07-1.63-5.64-4.5-6.32V1.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68c-.24.06-.47.15-.69.23L18 8.69z"/></svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-white text-sm font-medium">Notificaciones</p>
+                        <p className="text-[11px] mt-0.5" style={{
+                          color: notifPermission === "granted"
+                            ? "rgba(130,150,227,0.8)"
+                            : notifPermission === "denied"
+                            ? "rgba(255,80,80,0.6)"
+                            : "rgba(255,255,255,0.3)"
+                        }}>
+                          {notifPermission === "granted" && "Activadas"}
+                          {notifPermission === "denied" && "Bloqueadas en el sistema"}
+                          {notifPermission === "default" && "Tocá para activar"}
+                        </p>
+                      </div>
+                    </div>
+                    {notifPermission === "granted" ? (
+                      <div className="w-11 h-6 rounded-full flex-shrink-0"
+                        style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                        <span className="block w-5 h-5 rounded-full bg-white shadow mt-0.5 ml-auto mr-0.5" />
+                      </div>
+                    ) : notifPermission === "default" ? (
+                      <button onClick={enableNotif} disabled={notifLoading}
+                        className="w-11 h-6 rounded-full flex-shrink-0 disabled:opacity-40"
+                        style={{ background: "rgba(255,255,255,0.12)" }}>
+                        <span className="block w-5 h-5 rounded-full bg-white shadow mt-0.5 ml-0.5"
+                          style={{ opacity: notifLoading ? 0.5 : 1 }} />
+                      </button>
+                    ) : (
+                      <span className="text-[10px] px-2 py-1 rounded-full flex-shrink-0"
+                        style={{ background: "rgba(255,80,80,0.1)", color: "rgba(255,80,80,0.6)", border: "1px solid rgba(255,80,80,0.15)" }}>
+                        Bloqueadas
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 {/* Modo fantasma */}
                 <div className="rounded-2xl px-4 py-3.5 flex items-center justify-between" style={inp}>
                   <div className="flex items-center gap-3">

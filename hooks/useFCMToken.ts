@@ -2,6 +2,8 @@
 import { useEffect, useRef } from "react";
 import { firebaseApp } from "@/lib/firebase";
 
+// Solo registra el token si el permiso YA fue concedido previamente.
+// El pedido de permiso explícito lo maneja useNotificationPermission.
 export function useFCMToken(userId: string | null) {
   const registered = useRef(false);
 
@@ -9,8 +11,9 @@ export function useFCMToken(userId: string | null) {
     if (!userId || registered.current) return;
     if (typeof window === "undefined" || !("Notification" in window)) return;
     if (!("serviceWorker" in navigator)) return;
+    if (Notification.permission !== "granted") return;
 
-    async function register() {
+    async function registerExisting() {
       try {
         const { getMessaging, getToken } = await import("firebase/messaging");
         const messaging = getMessaging(firebaseApp);
@@ -18,13 +21,6 @@ export function useFCMToken(userId: string | null) {
         const swReg = await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
           scope: "/firebase-cloud-messaging-push-scope",
         });
-
-        const permission =
-          Notification.permission === "granted"
-            ? "granted"
-            : await Notification.requestPermission();
-
-        if (permission !== "granted") return;
 
         const token = await getToken(messaging, {
           vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
@@ -40,10 +36,10 @@ export function useFCMToken(userId: string | null) {
           });
         }
       } catch {
-        // Falla silenciosamente si el navegador no soporta FCM
+        // Falla silenciosamente
       }
     }
 
-    register();
+    registerExisting();
   }, [userId]);
 }

@@ -5,6 +5,7 @@ import { usePresence } from "@/hooks/usePresence";
 import { UserCard } from "@/components/user/UserCard";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { SkeletonList } from "@/components/ui/Skeletons";
+import { useNotificationPermission } from "@/hooks/useNotificationPermission";
 import { supabaseClient } from "@/lib/supabase";
 
 interface Props { userId: string }
@@ -14,6 +15,24 @@ export function HomeClient({ userId }: Props) {
   const { presences, totalCount } = usePresence(isInsideVenue && activeVenue ? activeVenue.id : null, userId);
   const [viewingPeople, setViewingPeople] = useState(false);
   const [ghostMode, setGhostMode] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(true);
+  const { permission: notifPermission, loading: notifLoading, enable: enableNotif } = useNotificationPermission();
+
+  // Mostrar banner si las notificaciones no están activadas aún
+  useEffect(() => {
+    const dismissed = localStorage.getItem("notif_banner_dismissed");
+    if (!dismissed) setBannerDismissed(false);
+  }, []);
+
+  function dismissBanner() {
+    localStorage.setItem("notif_banner_dismissed", "1");
+    setBannerDismissed(true);
+  }
+
+  async function handleEnableNotif() {
+    await enableNotif();
+    dismissBanner();
+  }
 
   // Cargar ghost mode
   useEffect(() => {
@@ -209,6 +228,38 @@ export function HomeClient({ userId }: Props) {
           </div>
         )}
       </main>
+
+      {/* Banner de notificaciones — solo cuando no están activadas y no fue descartado */}
+      {!bannerDismissed && notifPermission === "default" && (
+        <div className="fixed bottom-[72px] left-3 right-3 z-40 animate-slide-up"
+          style={{ filter: "drop-shadow(0 -4px 24px rgba(0,0,0,0.6))" }}>
+          <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3"
+            style={{ background: "rgba(18,18,24,0.97)", border: "1px solid rgba(130,150,227,0.25)", backdropFilter: "blur(20px)" }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: "rgba(130,150,227,0.15)" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#8296E3">
+                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-semibold">Activá las notificaciones</p>
+              <p className="text-white/40 text-xs mt-0.5">Enterate cuando alguien te da like</p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button onClick={dismissBanner}
+                className="text-white/30 text-xs px-2 py-1.5 rounded-lg"
+                style={{ background: "rgba(255,255,255,0.05)" }}>
+                Ahora no
+              </button>
+              <button onClick={handleEnableNotif} disabled={notifLoading}
+                className="text-white text-xs font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                {notifLoading ? "..." : "Activar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomNav />
     </div>
