@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "@/lib/supabase.server";
 import { supabaseAdmin } from "@/lib/supabase.admin";
+import { sendPushNotification } from "@/lib/sendNotification";
 
 export async function GET() {
   const session = await getServerSession();
@@ -52,7 +53,6 @@ export async function POST(req: NextRequest) {
   let matched = false;
 
   if (reverseLike) {
-    // Esperar brevemente para que el trigger tenga tiempo de crear el match
     await new Promise(r => setTimeout(r, 400));
 
     const { data: existingMatch } = await supabaseAdmin
@@ -66,6 +66,38 @@ export async function POST(req: NextRequest) {
     if (existingMatch) {
       matchId = existingMatch.id;
       matched = true;
+
+      // Notificar a ambos usuarios del match
+      const { data: profiles } = await supabaseAdmin
+        .from("profiles")
+        .select("id, name, first_name, push_subscription")
+        .in("id", [uid, to_user]);
+
+      const myProfile    = profiles?.find(p => p.id === uid);
+      const otherProfile = profiles?.find(p => p.id === to_user);
+      const myName       = myProfile?.name ?? myProfile?.first_name ?? "Alguien";
+      const otherName    = otherProfile?.name ?? otherProfile?.first_name ?? "Alguien";
+
+      const myToken    = (myProfile?.push_subscription as { fcm_token?: string } | null)?.fcm_token;
+      const otherToken = (otherProfile?.push_subscription as { fcm_token?: string } | null)?.fcm_token;
+
+      const notifyBoth = [];
+      if (otherToken) notifyBoth.push(sendPushNotification({
+        token: otherToken,
+        title: "¡Hiciste match! ❤️",
+        body:  `Conectaste con ${myName}`,
+        url:   `/chat/${matchId}`,
+        tag:   `match-${matchId}`,
+      }));
+      if (myToken) notifyBoth.push(sendPushNotification({
+        token: myToken,
+        title: "¡Hiciste match! ❤️",
+        body:  `Conectaste con ${otherName}`,
+        url:   `/chat/${matchId}`,
+        tag:   `match-${matchId}`,
+      }));
+
+      await Promise.allSettled(notifyBoth);
     }
   }
 

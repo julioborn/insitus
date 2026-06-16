@@ -2,6 +2,7 @@ import { getServerSession } from "@/lib/supabase.server";
 import { redirect } from "next/navigation";
 import { GeolocationProvider } from "@/contexts/GeolocationContext";
 import { MatchFlash } from "@/components/ui/MatchFlash";
+import { FCMProvider } from "@/components/ui/FCMProvider";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession();
@@ -11,6 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <GeolocationProvider userId={session.user.id}>
       {children}
       <MatchFlash userId={session.user.id} />
+      <FCMProvider userId={session.user.id} />
     </GeolocationProvider>
   );
 }
