@@ -75,28 +75,38 @@ export function BottomNav() {
         const active = path.startsWith(href);
         return (
           <Link key={href} href={href}
-            className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all"
-            style={{ color: active ? "#8296E3" : "rgba(255,255,255,0.35)" }}>
-            {/* Wrapper del ícono con tamaño fijo para anclar el badge */}
-            <span style={{ position: "relative", display: "inline-flex", width: 28, height: 28, alignItems: "center", justifyContent: "center" }}>
+            className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full"
+            style={{ color: active ? "#8296E3" : "rgba(255,255,255,0.38)", transition: "color 0.2s ease" }}>
+            {/* Pill activo + badge */}
+            <span style={{
+              position: "relative",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 48,
+              height: 30,
+              borderRadius: 16,
+              background: active ? "rgba(130,150,227,0.16)" : "transparent",
+              transition: "background 0.2s ease",
+            }}>
               <Icon filled={active} />
               {badge > 0 && (
                 <span style={{
                   position: "absolute",
-                  top: -6,
-                  right: -8,
-                  minWidth: 18,
-                  height: 18,
+                  top: -2,
+                  right: 2,
+                  minWidth: 17,
+                  height: 17,
                   borderRadius: 9,
                   background: "#FF3B30",
                   border: "2px solid #000",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: 800,
                   color: "#fff",
-                  padding: "0 4px",
+                  padding: "0 3px",
                   lineHeight: 1,
                   zIndex: 50,
                 }}>
@@ -104,10 +114,8 @@ export function BottomNav() {
                 </span>
               )}
             </span>
-            {active && (
-              <span style={{ width: 4, height: 4, borderRadius: "50%", background: "#8296E3", marginTop: -2 }} />
-            )}
-            <span className="text-[10px] font-medium tracking-wide" style={{ opacity: active ? 1 : 0.7 }}>
+            <span className="text-[10px] font-medium tracking-wide"
+              style={{ opacity: active ? 1 : 0.55, transition: "opacity 0.2s ease" }}>
               {label}
             </span>
           </Link>

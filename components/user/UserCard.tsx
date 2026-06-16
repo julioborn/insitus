@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Profile } from "@/lib/supabase";
@@ -14,8 +14,9 @@ export function UserCard({ profile, currentUserId, venueId }: Props) {
   const [liked, setLiked] = useState(false);
   const [matched, setMatched] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [beating, setBeating] = useState(false);
 
-  async function handleLike() {
+  const handleLike = useCallback(async () => {
     if (liked || loading) return;
     setLoading(true);
     const res = await fetch("/api/matches", {
@@ -27,31 +28,31 @@ export function UserCard({ profile, currentUserId, venueId }: Props) {
     setLiked(true);
     setMatched(data.matched);
     setLoading(false);
-  }
+    setBeating(true);
+    setTimeout(() => setBeating(false), 500);
+  }, [liked, loading, profile.id, venueId]);
 
   const displayName = profile.name ?? profile.first_name ?? "Sin nombre";
   const initial = displayName[0]?.toUpperCase() ?? "?";
 
   return (
     <div
-      className="flex items-center gap-4 px-4 py-3 rounded-2xl transition-all active:scale-[0.99]"
-      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+      className="flex items-center gap-4 px-4 py-3 rounded-2xl transition-all active:scale-[0.985]"
+      style={{
+        background: "rgba(255,255,255,0.05)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+      }}
     >
-      {/* Avatar circular */}
+      {/* Avatar */}
       <Link href={`/profile/${profile.id}`} className="flex-shrink-0">
         <div className="relative w-12 h-12 rounded-full overflow-hidden"
-          style={{ border: "1.5px solid rgba(255,255,255,0.12)" }}>
+          style={{ border: "1.5px solid rgba(255,255,255,0.14)" }}>
           {profile.avatar_url ? (
-            <Image
-              src={profile.avatar_url}
-              alt={displayName}
-              fill
-              sizes="48px"
-              className="object-cover"
-              unoptimized
-            />
+            <Image src={profile.avatar_url} alt={displayName} fill sizes="48px" className="object-cover" unoptimized />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-lg font-bold text-white"
+            <div className="w-full h-full flex items-center justify-center text-xl font-bold text-white"
               style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
               {initial}
             </div>
@@ -63,22 +64,16 @@ export function UserCard({ profile, currentUserId, venueId }: Props) {
       <Link href={`/profile/${profile.id}`} className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <p className="text-white text-sm font-semibold truncate">{displayName}</p>
-          {profile.gender === "hombre" && (
-            <span className="text-[11px] font-bold flex-shrink-0" style={{ color: "#60a5fa" }}>♂</span>
-          )}
-          {profile.gender === "mujer" && (
-            <span className="text-[11px] font-bold flex-shrink-0" style={{ color: "#f9a8d4" }}>♀</span>
-          )}
-          {profile.gender === "otro" && (
-            <span className="text-[11px] font-bold flex-shrink-0" style={{ color: "#c4b5fd" }}>⚧</span>
-          )}
+          {profile.gender === "hombre" && <span className="text-[11px] font-bold flex-shrink-0" style={{ color: "#60a5fa" }}>♂</span>}
+          {profile.gender === "mujer"  && <span className="text-[11px] font-bold flex-shrink-0" style={{ color: "#f9a8d4" }}>♀</span>}
+          {profile.gender === "otro"   && <span className="text-[11px] font-bold flex-shrink-0" style={{ color: "#c4b5fd" }}>⚧</span>}
         </div>
         {profile.birth_date && (() => {
           const b = new Date(profile.birth_date!);
           const today = new Date();
-          const a = today.getFullYear() - b.getFullYear() -
+          const age = today.getFullYear() - b.getFullYear() -
             (today < new Date(today.getFullYear(), b.getMonth(), b.getDate()) ? 1 : 0);
-          return <p className="text-white/40 text-xs mt-0.5">{a} años</p>;
+          return <p className="text-white/40 text-xs mt-0.5">{age} años</p>;
         })()}
       </Link>
 
@@ -87,22 +82,21 @@ export function UserCard({ profile, currentUserId, venueId }: Props) {
         <button
           onClick={handleLike}
           disabled={loading}
-          className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+          className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 ${beating ? "animate-heartbeat" : ""}`}
           style={{
-            background: liked
-              ? "linear-gradient(135deg, #8296E3, #4762C7)"
-              : "rgba(255,255,255,0.06)",
+            background: liked ? (matched ? "#FF3B30" : "linear-gradient(135deg, #8296E3, #4762C7)") : "rgba(255,255,255,0.06)",
             border: liked ? "none" : "1px solid rgba(255,255,255,0.1)",
+            boxShadow: liked ? (matched ? "0 0 16px rgba(255,59,48,0.4)" : "0 0 16px rgba(130,150,227,0.35)") : "none",
           }}
         >
           {loading ? (
             <div className="w-4 h-4 rounded-full border-2 border-white/40 border-t-transparent animate-spin" />
           ) : matched ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#FF3B30"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           ) : liked ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.8"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.8"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           )}
         </button>
       )}
@@ -110,7 +104,7 @@ export function UserCard({ profile, currentUserId, venueId }: Props) {
       {/* Badge match */}
       {matched && (
         <span className="text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full text-white animate-pulse"
-          style={{ background: "#FF3B30" }}>
+          style={{ background: "linear-gradient(135deg, #FF3B30, #FF6B6B)", flexShrink: 0 }}>
           ❤️ MATCH
         </span>
       )}

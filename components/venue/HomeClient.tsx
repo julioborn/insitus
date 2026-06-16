@@ -4,6 +4,7 @@ import { useGeoContext } from "@/contexts/GeolocationContext";
 import { usePresence } from "@/hooks/usePresence";
 import { UserCard } from "@/components/user/UserCard";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { SkeletonList } from "@/components/ui/Skeletons";
 import { supabaseClient } from "@/lib/supabase";
 
 interface Props { userId: string }
@@ -50,32 +51,51 @@ export function HomeClient({ userId }: Props) {
 
       <main className="flex-1 px-4 py-6 overflow-y-auto pb-24">
         {isLoading && (
-          <div className="flex flex-col items-center justify-center h-64 gap-3">
-            <div className="w-8 h-8 rounded-full border-2 border-[#8296E3] border-t-transparent animate-spin" />
-            <p className="text-white/40 text-sm">Detectando ubicación...</p>
+          <div className="flex flex-col gap-4 animate-fade-in">
+            {/* Skeleton de la card del venue */}
+            <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <div className="skeleton h-36 w-full rounded-none" />
+              <div className="p-4 flex flex-col gap-3">
+                <div className="skeleton h-4 rounded-lg w-40" />
+                <div className="skeleton h-3 rounded-lg w-24" />
+                <div className="skeleton h-10 rounded-xl w-full mt-1" />
+              </div>
+            </div>
+            <SkeletonList count={3} />
           </div>
         )}
 
         {!isLoading && error && (
-          <div className="flex flex-col items-center justify-center h-64 gap-4 text-center px-8">
-            <span className="text-4xl">📍</span>
-            <p className="text-white font-medium">Permiso de ubicación requerido</p>
-            <p className="text-white/40 text-sm">Activá la ubicación para poder conectarte con quienes están cerca.</p>
+          <div className="flex flex-col items-center justify-center py-20 gap-4 text-center px-8 animate-fade-in">
+            <div className="relative flex items-center justify-center w-20 h-20">
+              <div className="absolute inset-0 rounded-full blur-2xl opacity-25" style={{ background: "radial-gradient(circle, #f59e0b, transparent)" }} />
+              <span className="text-4xl relative z-10">📍</span>
+            </div>
+            <div>
+              <p className="text-white font-semibold text-base">Permiso de ubicación requerido</p>
+              <p className="text-white/40 text-sm mt-1">Activá la ubicación para conectarte con quienes están cerca.</p>
+            </div>
           </div>
         )}
 
         {!isLoading && !error && !isInsideVenue && (
-          <div className="flex flex-col items-center justify-center h-64 gap-3 text-center px-8">
-            <span className="text-4xl">🌙</span>
-            <p className="text-white font-medium">No estás en ningún lugar</p>
-            <p className="text-white/40 text-sm">Cuando estés cerca de un establecimiento asociado, aparecerá acá.</p>
-            {distance !== null && (
-              <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.2)" }}>
-                {distance < 1000
-                  ? `${Math.round(distance)}m del establecimiento más cercano`
-                  : `${(distance / 1000).toFixed(1)}km del establecimiento más cercano`}
-              </p>
-            )}
+          <div className="flex flex-col items-center justify-center py-20 gap-4 text-center px-8 animate-fade-in">
+            <div className="relative flex items-center justify-center w-20 h-20">
+              <div className="absolute inset-0 rounded-full blur-2xl opacity-25" style={{ background: "radial-gradient(circle, #8296E3, transparent)" }} />
+              <span className="text-4xl relative z-10">🌙</span>
+            </div>
+            <div>
+              <p className="text-white font-semibold text-base">No estás en ningún lugar</p>
+              <p className="text-white/40 text-sm mt-1">Cuando estés cerca de un lugar asociado, aparecerá acá.</p>
+              {distance !== null && (
+                <p className="text-xs mt-3 px-4 py-2 rounded-full inline-block"
+                  style={{ color: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  {distance < 1000
+                    ? `A ${Math.round(distance)}m del más cercano`
+                    : `A ${(distance / 1000).toFixed(1)}km del más cercano`}
+                </p>
+              )}
+            </div>
           </div>
         )}
 
@@ -165,10 +185,15 @@ export function HomeClient({ userId }: Props) {
                       </button>
                     </div>
                     {others.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-48 gap-3 text-center">
-                        <span className="text-4xl">🎉</span>
-                        <p className="text-white font-medium">Sos el primero</p>
-                        <p className="text-white/40 text-sm">Esperá a que llegue más gente.</p>
+                      <div className="flex flex-col items-center justify-center py-16 gap-4 text-center animate-fade-in">
+                        <div className="relative flex items-center justify-center w-20 h-20">
+                          <div className="absolute inset-0 rounded-full blur-2xl opacity-30" style={{ background: "radial-gradient(circle, #8296E3, transparent)" }} />
+                          <span className="text-4xl relative z-10">🎉</span>
+                        </div>
+                        <div>
+                          <p className="text-white font-semibold text-base">Sos el primero</p>
+                          <p className="text-white/40 text-sm mt-1">Esperá a que llegue más gente.</p>
+                        </div>
                       </div>
                     ) : (
                       <div className="flex flex-col gap-2">
