@@ -86,20 +86,42 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
   return (
     <div className="flex flex-col min-h-screen bg-black pb-24">
 
-      {/* Hero — foto full width */}
+      {/* Hero — fondo borroso + avatar nítido centrado (técnica Spotify/Instagram) */}
       {!editing && (
-        <div className="relative w-full" style={{ height: "52vw", minHeight: 220, maxHeight: 340 }}>
+        <div className="relative w-full overflow-hidden" style={{ height: 280 }}>
+          {/* Fondo borroso */}
           {profile?.avatar_url ? (
-            <Image src={profile.avatar_url} alt={displayName} fill sizes="100vw" className="object-cover" unoptimized priority />
+            <img
+              src={profile.avatar_url}
+              alt=""
+              aria-hidden
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ filter: "blur(28px)", transform: "scale(1.15)", opacity: 0.55 }}
+            />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
-              <span className="text-white font-bold" style={{ fontSize: 72 }}>{initial}</span>
-            </div>
+            <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)", opacity: 0.6 }} />
           )}
-          {/* Gradiente */}
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #000 0%, rgba(0,0,0,0.15) 55%, transparent 100%)" }} />
-          {/* Nombre sobre la foto */}
+
+          {/* Oscurecer */}
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #000 0%, transparent 60%)" }} />
+
+          {/* Avatar nítido centrado */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pb-8">
+            <div className="relative w-28 h-28 rounded-full overflow-hidden mb-3"
+              style={{ border: "3px solid rgba(255,255,255,0.25)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
+              {profile?.avatar_url ? (
+                <Image src={profile.avatar_url} alt={displayName} fill sizes="112px" className="object-cover" unoptimized priority />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-white"
+                  style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                  {initial}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Nombre en la parte inferior */}
           <div className="absolute bottom-4 left-5 right-5">
             <div className="flex items-end justify-between">
               <div>
