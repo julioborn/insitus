@@ -86,47 +86,58 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
   return (
     <div className="flex flex-col min-h-screen bg-black pb-24">
 
-      {/* Hero — avatar + nombre */}
-      <div className="relative flex flex-col items-center px-5 pt-14 pb-8">
-        {/* Glow detrás del avatar */}
-        <div className="absolute top-10 w-32 h-32 rounded-full opacity-20 blur-2xl"
-          style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }} />
-
-        <div className="relative w-24 h-24 rounded-full overflow-hidden mb-4"
-          style={{ border: "2.5px solid rgba(130,150,227,0.5)" }}>
+      {/* Hero — foto full width */}
+      {!editing && (
+        <div className="relative w-full" style={{ height: "52vw", minHeight: 220, maxHeight: 340 }}>
           {profile?.avatar_url ? (
-            <Image src={profile.avatar_url} alt={displayName} fill sizes="96px" className="object-cover" unoptimized />
+            <Image src={profile.avatar_url} alt={displayName} fill sizes="100vw" className="object-cover" unoptimized priority />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-white"
+            <div className="absolute inset-0 flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
-              {initial}
+              <span className="text-white font-bold" style={{ fontSize: 72 }}>{initial}</span>
             </div>
           )}
-        </div>
-
-        {!editing && (
-          <div className="flex flex-col items-center gap-1">
-            <h1 className="text-xl font-bold text-white">{displayName}</h1>
-            {profile?.username && (
-              <p className="text-sm" style={{ color: "rgba(130,150,227,0.8)" }}>@{profile.username}</p>
-            )}
-            <div className="flex items-center gap-3 mt-1">
-              {age !== null && (
-                <span className="text-xs px-2.5 py-1 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)" }}>
-                  {age} años
-                </span>
-              )}
+          {/* Gradiente */}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #000 0%, rgba(0,0,0,0.15) 55%, transparent 100%)" }} />
+          {/* Nombre sobre la foto */}
+          <div className="absolute bottom-4 left-5 right-5">
+            <div className="flex items-end justify-between">
+              <div>
+                <h1 className="text-white font-bold text-2xl leading-tight drop-shadow">
+                  {displayName}{age !== null ? `, ${age}` : ""}
+                </h1>
+                {profile?.username && (
+                  <p className="text-sm mt-0.5 drop-shadow" style={{ color: "rgba(200,210,255,0.8)" }}>@{profile.username}</p>
+                )}
+              </div>
               {ghostMode && (
                 <span className="text-xs px-2.5 py-1 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)" }}>
+                  style={{ background: "rgba(0,0,0,0.5)", color: "rgba(255,255,255,0.6)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}>
                   👻 Fantasma
                 </span>
               )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Hero modo edición — avatar pequeño */}
+      {editing && (
+        <div className="relative flex flex-col items-center px-5 pt-14 pb-6">
+          <div className="relative w-20 h-20 rounded-full overflow-hidden mb-3"
+            style={{ border: "2px solid rgba(130,150,227,0.5)" }}>
+            {profile?.avatar_url ? (
+              <Image src={profile.avatar_url} alt={displayName} fill sizes="80px" className="object-cover" unoptimized />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white"
+                style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+                {initial}
+              </div>
+            )}
+          </div>
+          <p className="text-white/40 text-xs uppercase tracking-widest">Editando perfil</p>
+        </div>
+      )}
 
       <div className="flex-1 px-4">
 
