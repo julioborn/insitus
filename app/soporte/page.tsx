@@ -4,9 +4,9 @@ export const metadata = {
 
 export default function SoportePage() {
   return (
-    <main style={{ maxWidth: 720, margin: "0 auto", padding: "40px 24px", fontFamily: "sans-serif", color: "#111", lineHeight: 1.7 }}>
+    <main style={{ maxWidth: 720, margin: "0 auto", padding: "40px 24px", fontFamily: "sans-serif", color: "#f1f1f1", lineHeight: 1.7, backgroundColor: "#000", minHeight: "100vh" }}>
       <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Soporte</h1>
-      <p style={{ color: "#555", marginBottom: 32 }}>¿Necesitás ayuda con Insitus? Estamos para asistirte.</p>
+      <p style={{ color: "#aaa", marginBottom: 32 }}>¿Necesitás ayuda con Insitus? Estamos para asistirte.</p>
 
       <h2 style={{ fontSize: 20, fontWeight: 600, marginTop: 32 }}>Contacto</h2>
       <p>Para consultas, problemas técnicos o cualquier duda, escribinos a:<br />

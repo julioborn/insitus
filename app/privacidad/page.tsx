@@ -4,9 +4,9 @@ export const metadata = {
 
 export default function PrivacidadPage() {
   return (
-    <main style={{ maxWidth: 720, margin: "0 auto", padding: "40px 24px", fontFamily: "sans-serif", color: "#111", lineHeight: 1.7 }}>
+    <main style={{ maxWidth: 720, margin: "0 auto", padding: "40px 24px", fontFamily: "sans-serif", color: "#f1f1f1", lineHeight: 1.7, backgroundColor: "#000", minHeight: "100vh" }}>
       <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Política de Privacidad</h1>
-      <p style={{ color: "#555", marginBottom: 32 }}>Última actualización: junio de 2026</p>
+      <p style={{ color: "#aaa", marginBottom: 32 }}>Última actualización: junio de 2026</p>
 
       <p>Insitus ("nosotros", "nuestro") opera la aplicación móvil y sitio web Insitus (el "Servicio"). Esta página te informa sobre nuestra política respecto a la recopilación, uso y divulgación de datos personales cuando usás el Servicio.</p>
 
