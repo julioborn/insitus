@@ -10,7 +10,7 @@ export default function SoportePage() {
 
       <h2 style={{ fontSize: 20, fontWeight: 600, marginTop: 32 }}>Contacto</h2>
       <p>Para consultas, problemas técnicos o cualquier duda, escribinos a:<br />
-        <a href="mailto:contacto@insitus.com.ar" style={{ color: "#6366f1" }}>contacto@insitus.com.ar</a>
+        <a href="mailto:julio@estudioborn.com.ar" style={{ color: "#6366f1" }}>julio@estudioborn.com.ar</a>
       </p>
       <p>Respondemos dentro de las 48 horas hábiles.</p>
 
@@ -29,7 +29,7 @@ export default function SoportePage() {
       <p>Insitus usa tu ubicación para mostrarte los establecimientos cercanos donde podés conectarte con otras personas. No almacenamos tu ubicación exacta.</p>
 
       <h3 style={{ fontSize: 17, fontWeight: 600, marginTop: 24 }}>¿Cómo reporto un usuario?</h3>
-      <p>Si encontrás un comportamiento inapropiado, escribinos a <a href="mailto:contacto@insitus.com.ar" style={{ color: "#6366f1" }}>contacto@insitus.com.ar</a> con el detalle del caso y lo revisamos a la brevedad.</p>
+      <p>Si encontrás un comportamiento inapropiado, escribinos a <a href="mailto:julio@estudioborn.com.ar" style={{ color: "#6366f1" }}>julio@estudioborn.com.ar</a> con el detalle del caso y lo revisamos a la brevedad.</p>
 
       <h2 style={{ fontSize: 20, fontWeight: 600, marginTop: 32 }}>Política de Privacidad</h2>
       <p>

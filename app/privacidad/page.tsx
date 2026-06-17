@@ -48,7 +48,7 @@ export default function PrivacidadPage() {
       <p>Podemos actualizar esta política ocasionalmente. Te notificaremos publicando la nueva versión en esta página.</p>
 
       <h2 style={{ fontSize: 20, fontWeight: 600, marginTop: 32 }}>8. Contacto</h2>
-      <p>Si tenés preguntas sobre esta política, escribinos a: <a href="mailto:contacto@insitus.com.ar" style={{ color: "#6366f1" }}>contacto@insitus.com.ar</a></p>
+      <p>Si tenés preguntas sobre esta política, escribinos a: <a href="mailto:julio@estudioborn.com.ar" style={{ color: "#6366f1" }}>julio@estudioborn.com.ar</a></p>
     </main>
   );
 }
