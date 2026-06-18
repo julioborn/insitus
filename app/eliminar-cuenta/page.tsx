@@ -20,7 +20,7 @@ export default function EliminarCuentaPage() {
       </ol>
 
       <h2 style={{ fontSize: 20, fontWeight: 600, marginTop: 32 }}>Opción 2: Por email</h2>
-      <p>Enviá un correo a <a href="mailto:contacto@insitus.com.ar" style={{ color: "#6366f1" }}>contacto@insitus.com.ar</a> con el asunto <strong>"Eliminar mi cuenta"</strong> desde el email asociado a tu cuenta. Procesaremos tu solicitud en un plazo máximo de 7 días hábiles.</p>
+      <p>Enviá un correo a <a href="mailto:contacto@insitus.com.ar" style={{ color: "#818cf8" }}>contacto@insitus.com.ar</a> con el asunto <strong>"Eliminar mi cuenta"</strong> desde el email asociado a tu cuenta. Procesaremos tu solicitud en un plazo máximo de 7 días hábiles.</p>
 
       <h2 style={{ fontSize: 20, fontWeight: 600, marginTop: 32 }}>¿Qué datos se eliminan?</h2>
       <ul>
