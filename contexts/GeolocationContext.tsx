@@ -76,18 +76,20 @@ export function GeolocationProvider({ userId, children }: { userId: string; chil
 
     let nearest: Venue | null = null;
     let minDist = Infinity;
+    let activeVenue: Venue | null = null;
+    let smallestRadius = Infinity;
+
     for (const v of venues) {
       const d = haversineDistance(coords.latitude, coords.longitude, v.lat, v.lng);
       if (d < minDist) { minDist = d; nearest = v; }
+      if (isInsideVenueRadius(coords.latitude, coords.longitude, v) && isVenueOpen(v)) {
+        if (v.radius_meters < smallestRadius) { smallestRadius = v.radius_meters; activeVenue = v; }
+      }
     }
 
-    const inside = nearest
-      ? isInsideVenueRadius(coords.latitude, coords.longitude, nearest) && isVenueOpen(nearest)
-      : false;
-
-    if (inside && nearest) {
-      if (!wasInsideRef.current) await activatePresence(nearest);
-      setState(s => ({ ...s, isInsideVenue: true, distance: minDist, activeVenue: nearest, isLoading: false, error: null }));
+    if (activeVenue) {
+      if (!wasInsideRef.current) await activatePresence(activeVenue);
+      setState(s => ({ ...s, isInsideVenue: true, distance: minDist === Infinity ? null : minDist, activeVenue, isLoading: false, error: null }));
     } else {
       if (wasInsideRef.current) await deactivatePresence();
       setState(s => ({ ...s, isInsideVenue: false, distance: minDist === Infinity ? null : minDist, activeVenue: null, isLoading: false, error: null }));

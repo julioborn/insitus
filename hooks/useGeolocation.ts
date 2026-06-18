@@ -71,21 +71,22 @@ export function useGeolocation(userId: string | null) {
       return;
     }
 
-    // Encontrar el venue más cercano
     let nearest: Venue | null = null;
     let minDist = Infinity;
+    let activeVenue: Venue | null = null;
+    let smallestRadius = Infinity;
+
     for (const venue of venues) {
       const d = haversineDistance(coords.latitude, coords.longitude, venue.lat, venue.lng);
       if (d < minDist) { minDist = d; nearest = venue; }
+      if (isInsideVenueRadius(coords.latitude, coords.longitude, venue) && isVenueOpen(venue)) {
+        if (venue.radius_meters < smallestRadius) { smallestRadius = venue.radius_meters; activeVenue = venue; }
+      }
     }
 
-    const inside = nearest
-      ? isInsideVenueRadius(coords.latitude, coords.longitude, nearest) && isVenueOpen(nearest)
-      : false;
-
-    if (inside && nearest) {
-      if (!wasInsideRef.current) await activatePresence(nearest);
-      setState(s => ({ ...s, isInsideVenue: true, distance: minDist, activeVenue: nearest, isLoading: false, error: null }));
+    if (activeVenue) {
+      if (!wasInsideRef.current) await activatePresence(activeVenue);
+      setState(s => ({ ...s, isInsideVenue: true, distance: minDist === Infinity ? null : minDist, activeVenue, isLoading: false, error: null }));
     } else {
       if (wasInsideRef.current) await deactivatePresence();
       setState(s => ({ ...s, isInsideVenue: false, distance: minDist === Infinity ? null : minDist, activeVenue: null, isLoading: false, error: null }));
