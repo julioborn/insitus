@@ -4,9 +4,9 @@ export const metadata = {
 
 export default function EliminarCuentaPage() {
   return (
-    <main style={{ maxWidth: 720, margin: "0 auto", padding: "40px 24px", fontFamily: "sans-serif", color: "#111", lineHeight: 1.7 }}>
+    <main style={{ maxWidth: 720, margin: "0 auto", padding: "40px 24px", fontFamily: "sans-serif", color: "#f1f1f1", lineHeight: 1.7, background: "#000", minHeight: "100vh" }}>
       <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Eliminación de cuenta y datos</h1>
-      <p style={{ color: "#555", marginBottom: 32 }}>Insitus – insitus.com.ar</p>
+      <p style={{ color: "#999", marginBottom: 32 }}>Insitus – insitus.com.ar</p>
 
       <p>Si deseas eliminar tu cuenta de Insitus y todos los datos asociados, podés hacerlo directamente desde la app o solicitarlo por email.</p>
 
@@ -33,7 +33,7 @@ export default function EliminarCuentaPage() {
       <h2 style={{ fontSize: 20, fontWeight: 600, marginTop: 32 }}>¿Qué datos se conservan?</h2>
       <p>Los mensajes ya fueron eliminados automáticamente al ser leídos (funcionamiento Snapchat). No conservamos mensajes una vez eliminada la cuenta.</p>
 
-      <p style={{ marginTop: 32, color: "#555" }}>Para más información consultá nuestra <a href="/privacidad" style={{ color: "#6366f1" }}>Política de Privacidad</a>.</p>
+      <p style={{ marginTop: 32, color: "#999" }}>Para más información consultá nuestra <a href="/privacidad" style={{ color: "#818cf8" }}>Política de Privacidad</a>.</p>
     </main>
   );
 }

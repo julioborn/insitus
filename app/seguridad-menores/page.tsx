@@ -4,9 +4,9 @@ export const metadata = {
 
 export default function SeguridadMenoresPage() {
   return (
-    <main style={{ maxWidth: 720, margin: "0 auto", padding: "40px 24px", fontFamily: "sans-serif", color: "#111", lineHeight: 1.7 }}>
+    <main style={{ maxWidth: 720, margin: "0 auto", padding: "40px 24px", fontFamily: "sans-serif", color: "#f1f1f1", lineHeight: 1.7, background: "#000", minHeight: "100vh" }}>
       <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Estándares de Seguridad Infantil</h1>
-      <p style={{ color: "#555", marginBottom: 32 }}>Insitus – insitus.com.ar · Última actualización: junio de 2026</p>
+      <p style={{ color: "#999", marginBottom: 32 }}>Insitus – insitus.com.ar · Última actualización: junio de 2026</p>
 
       <p>Insitus es una aplicación para mayores de 18 años. Nos comprometemos firmemente con la protección de los menores y con la prevención de cualquier forma de explotación o abuso sexual infantil (CSAE) en nuestra plataforma.</p>
 
@@ -39,13 +39,13 @@ export default function SeguridadMenoresPage() {
 
       <h2 style={{ fontSize: 20, fontWeight: 600, marginTop: 32 }}>5. Contacto de seguridad</h2>
       <p>Para reportar problemas de seguridad relacionados con menores, o para consultas sobre el cumplimiento de estos estándares, contactanos en:</p>
-      <p><a href="mailto:juliobornes10@gmail.com" style={{ color: "#6366f1" }}>juliobornes10@gmail.com</a></p>
+      <p><a href="mailto:juliobornes10@gmail.com" style={{ color: "#818cf8" }}>juliobornes10@gmail.com</a></p>
       <p>Respondemos a todos los reportes de seguridad infantil en un plazo máximo de 24 horas hábiles.</p>
 
       <h2 style={{ fontSize: 20, fontWeight: 600, marginTop: 32 }}>6. Cumplimiento legal</h2>
       <p>Insitus cumple con todas las leyes de protección infantil aplicables en la República Argentina y colabora plenamente con las autoridades judiciales y de seguridad ante cualquier investigación relacionada con la seguridad de los niños.</p>
 
-      <p style={{ marginTop: 32, color: "#555" }}>Para más información consultá nuestra <a href="/privacidad" style={{ color: "#6366f1" }}>Política de Privacidad</a>.</p>
+      <p style={{ marginTop: 32, color: "#999" }}>Para más información consultá nuestra <a href="/privacidad" style={{ color: "#818cf8" }}>Política de Privacidad</a>.</p>
     </main>
   );
 }
