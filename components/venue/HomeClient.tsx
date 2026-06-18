@@ -14,32 +14,36 @@ interface Props { userId: string }
 function VenueCard({ venue, onView }: { venue: Venue; onView: () => void }) {
   return (
     <div
-      className="rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
+      className="rounded-2xl p-5 cursor-pointer active:scale-[0.98] transition-transform flex items-center gap-4"
       style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
       onClick={onView}
     >
-      <div className="h-36 overflow-hidden">
-        {venue.logo_url ? (
-          <img src={venue.logo_url} alt={venue.name} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, rgba(130,150,227,0.2), rgba(71,98,199,0.2))" }}>
-            <span className="text-5xl">🎉</span>
-          </div>
-        )}
-      </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-white font-bold text-lg">{venue.name}</p>
-            {venue.address && <p className="text-white/40 text-xs mt-0.5">{venue.address}</p>}
-          </div>
-          <span className="text-xs px-2 py-0.5 rounded-full text-green-400 bg-green-400/10 flex-shrink-0 ml-2">Abierto</span>
+      {/* Avatar circular */}
+      <div className="flex-shrink-0 relative">
+        <div className="w-16 h-16 rounded-full overflow-hidden"
+          style={{ border: "2px solid rgba(130,150,227,0.4)", boxShadow: "0 0 16px rgba(130,150,227,0.2)" }}>
+          {venue.logo_url ? (
+            <img src={venue.logo_url} alt={venue.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-2xl"
+              style={{ background: "linear-gradient(135deg, rgba(130,150,227,0.3), rgba(71,98,199,0.3))" }}>
+              🎉
+            </div>
+          )}
         </div>
-        <button className="mt-4 w-full py-2.5 rounded-xl text-sm font-semibold text-white"
-          style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+        {/* Punto verde de activo */}
+        <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-400 border-2 border-black" />
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className="text-white font-bold text-base truncate">{venue.name}</p>
+        {venue.address && (
+          <p className="text-white/40 text-xs mt-0.5 truncate">{venue.address}</p>
+        )}
+        <p className="text-[11px] font-semibold mt-1.5" style={{ color: "#8296E3" }}>
           Ver quién está acá →
-        </button>
+        </p>
       </div>
     </div>
   );
