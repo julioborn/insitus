@@ -34,16 +34,19 @@ export function GeolocationProvider({ userId, children }: { userId: string; chil
   const lastFetchRef       = useRef(0);
   const userIdRef          = useRef(userId);
   const userIsTestRef      = useRef<boolean>(false);
+  const lastCoordsRef      = useRef<GeolocationCoordinates | null>(null);
   const checkLocationRef   = useRef<((coords: GeolocationCoordinates) => Promise<void>) | null>(null);
 
   useEffect(() => { userIdRef.current = userId; }, [userId]);
 
-  // Detecta si es cuenta tester por email; invalida caché de venues
+  // getSession es local (sin red), resuelve antes del primer GPS
+  // Tras confirmar el email, invalida caché y re-evalúa con las últimas coords
   useEffect(() => {
-    supabaseClient.auth.getUser().then(({ data }) => {
-      const email = data.user?.email ?? "";
+    supabaseClient.auth.getSession().then(({ data }) => {
+      const email = data.session?.user?.email ?? "";
       userIsTestRef.current = /^tester\d+@insitus\.com\.ar$/.test(email);
       lastFetchRef.current = 0;
+      if (lastCoordsRef.current) checkLocationRef.current?.(lastCoordsRef.current);
     });
   }, [userId]);
 
@@ -143,7 +146,7 @@ export function GeolocationProvider({ userId, children }: { userId: string; chil
     loadVenues();
 
     watchIdRef.current = navigator.geolocation.watchPosition(
-      pos => checkLocationRef.current?.(pos.coords),
+      pos => { lastCoordsRef.current = pos.coords; checkLocationRef.current?.(pos.coords); },
       err => setState(s => ({ ...s, error: err.message, isLoading: false })),
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
     );
