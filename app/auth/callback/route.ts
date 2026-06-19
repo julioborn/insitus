@@ -50,10 +50,10 @@ export async function GET(req: NextRequest) {
         });
         return NextResponse.redirect(`${origin}/completar-perfil`);
       } else {
-        // Actualizar nombre y avatar en cada login
+        // Actualizar nombre y avatar en cada login (solo si vienen datos)
         await supabaseAdmin.from("profiles").update({
           name: fullName ?? existing.username,
-          avatar_url: avatar,
+          ...(avatar ? { avatar_url: avatar } : {}),
         }).eq("id", id);
 
         // Limpiar presencias viejas de sesiones anteriores
