@@ -32,6 +32,9 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
   const [ghostMode, setGhostMode] = useState(false);
   const [togglingGhost, setTogglingGhost] = useState(false);
   const [form, setForm] = useState({ name: "", bio: "", instagram_handle: "" });
+  const [blocked, setBlocked] = useState(false);
+  const [blocking, setBlocking] = useState(false);
+  const [confirmBlock, setConfirmBlock] = useState(false);
 
   const { permission: notifPermission, loading: notifLoading, enable: enableNotif } = useNotificationPermission();
   const isOwn = profileId === "me" || profileId === currentUserId;
@@ -50,7 +53,21 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
     if (isOwn) {
       fetch("/api/profile/photos").then(r => r.json()).then(d => setPhotos(Array.isArray(d) ? d : []));
     }
+    if (!isOwn) {
+      supabaseClient.from("blocked_users")
+        .select("id").eq("blocker_id", currentUserId).eq("blocked_id", resolvedId).maybeSingle()
+        .then(({ data }) => setBlocked(!!data));
+    }
   }, [resolvedId]);
+
+  async function handleBlock() {
+    setBlocking(true);
+    await fetch("/api/users/block", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ blocked_id: resolvedId }) });
+    setBlocked(true);
+    setBlocking(false);
+    setConfirmBlock(false);
+    router.back();
+  }
 
   async function toggleGhostMode() {
     setTogglingGhost(true);
@@ -291,6 +308,37 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
                   <div className="flex items-center gap-2.5">
                     <span className="text-base">💬</span>
                     <p className="text-sm text-white/70">{profile.whatsapp}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isOwn && (
+              <div className="mt-2">
+                {!confirmBlock ? (
+                  <button onClick={() => setConfirmBlock(true)}
+                    className="w-full py-3 rounded-2xl text-sm font-medium flex items-center justify-center gap-2"
+                    style={{ background: "rgba(255,60,60,0.08)", border: "1px solid rgba(255,60,60,0.15)", color: "rgba(255,80,80,0.6)" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                    {blocked ? "Usuario bloqueado" : "Bloquear usuario"}
+                  </button>
+                ) : (
+                  <div className="rounded-2xl p-4 flex flex-col gap-3" style={{ background: "rgba(255,60,60,0.08)", border: "1px solid rgba(255,60,60,0.2)" }}>
+                    <p className="text-sm text-white/70 text-center">¿Bloqueás a este usuario? Ya no se verán entre sí.</p>
+                    <div className="flex gap-3">
+                      <button onClick={() => setConfirmBlock(false)}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium"
+                        style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)" }}>
+                        Cancelar
+                      </button>
+                      <button onClick={handleBlock} disabled={blocking}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50"
+                        style={{ background: "rgba(255,60,60,0.25)", color: "rgba(255,100,100,0.9)" }}>
+                        {blocking ? "Bloqueando..." : "Sí, bloquear"}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

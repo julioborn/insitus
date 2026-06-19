@@ -15,19 +15,23 @@ export function usePresence(venueId: string | null, currentUserId?: string) {
   const fetchPresences = useCallback(async () => {
     if (!venueId) { setPresences([]); setTotalCount(0); setIsLoading(false); return; }
 
-    const { data } = await supabaseClient
-      .from("presences")
-      .select("*, profiles(*)")
-      .eq("venue_id", venueId)
-      .eq("is_active", true);
+    const [{ data }, { data: blockedData }] = await Promise.all([
+      supabaseClient.from("presences").select("*, profiles(*)").eq("venue_id", venueId).eq("is_active", true),
+      currentUserId
+        ? supabaseClient.from("blocked_users").select("blocked_id, blocker_id").or(`blocker_id.eq.${currentUserId},blocked_id.eq.${currentUserId}`)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    const blockedIds = new Set(
+      (blockedData ?? []).flatMap((b: { blocker_id: string; blocked_id: string }) =>
+        b.blocker_id === currentUserId ? [b.blocked_id] : [b.blocker_id]
+      )
+    );
 
     const all = (data as PresenceWithProfile[]) ?? [];
-
-    // Total excluye al usuario actual
-    const othersAll = all.filter(p => p.user_id !== currentUserId);
+    const othersAll = all.filter(p => p.user_id !== currentUserId && !blockedIds.has(p.user_id));
     setTotalCount(othersAll.length);
 
-    // Visibles = otros + no fantasma
     const visible = othersAll.filter(p => !p.profiles?.ghost_mode);
     setPresences(visible);
     setIsLoading(false);
