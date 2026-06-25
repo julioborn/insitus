@@ -12,7 +12,7 @@ interface Photo { id: string; url: string; position: number }
 
 interface Props { profileId: string; currentUserId: string }
 
-const inp = { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" };
+const inp = { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" };
 
 function calcAge(birthDate: string | null): number | null {
   if (!birthDate) return null;
@@ -20,6 +20,11 @@ function calcAge(birthDate: string | null): number | null {
   const t = new Date();
   return t.getFullYear() - b.getFullYear() -
     (t < new Date(t.getFullYear(), b.getMonth(), b.getDate()) ? 1 : 0);
+}
+
+function formatMemberSince(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString("es-AR", { month: "long", year: "numeric" });
 }
 
 export function ProfileClient({ profileId, currentUserId }: Props) {
@@ -90,8 +95,9 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-black gap-3">
         <div className="w-8 h-8 rounded-full border-2 border-[#8296E3] border-t-transparent animate-spin" />
+        <p className="text-white/30 text-xs">Cargando perfil...</p>
       </div>
     );
   }
@@ -203,12 +209,12 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
             ))}
             <div className="flex gap-3 mt-2">
               <button onClick={() => setEditing(false)}
-                className="flex-1 py-3 rounded-2xl text-sm font-medium"
+                className="btn-secondary flex-1 py-3 rounded-2xl text-sm font-medium"
                 style={{ ...inp, color: "rgba(255,255,255,0.5)" }}>
                 Cancelar
               </button>
               <button onClick={handleSave} disabled={saving}
-                className="flex-1 py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-50"
+                className="btn-primary flex-1 py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
                 {saving ? "Guardando..." : "Guardar"}
               </button>
@@ -233,15 +239,18 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
 
             {/* Bio */}
             {profile?.bio && (
-              <div className="rounded-2xl px-4 py-3.5" style={inp}>
-                <p className="text-[10px] uppercase tracking-widest mb-1.5"
-                  style={{ color: "rgba(255,255,255,0.3)" }}>Bio</p>
+              <div className="surface-card rounded-2xl px-4 py-3.5" style={inp}>
+                <p className="text-[10px] uppercase tracking-widest mb-1.5 flex items-center gap-1.5"
+                  style={{ color: "rgba(255,255,255,0.3)" }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><path d="M3 21c3 0 7-2 7-8V5H4v8h4c0 4-3 6-5 6v2zm10 0c3 0 7-2 7-8V5h-6v8h4c0 4-3 6-5 6v2z"/></svg>
+                  Bio
+                </p>
                 <p className="text-white/80 text-sm leading-relaxed">{profile.bio}</p>
               </div>
             )}
 
             {/* Info chips */}
-            {(profile?.city || profile?.gender) && (
+            {(profile?.city || profile?.gender || profile?.created_at) && (
               <div className="flex flex-wrap gap-2">
                 {profile.city && (
                   <span className="text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5"
@@ -255,12 +264,18 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
                     <span className="text-white/70 capitalize">{profile.gender}</span>
                   </span>
                 )}
+                {profile.created_at && (
+                  <span className="text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5"
+                    style={inp}>
+                    <span>📅</span><span className="text-white/70">Desde {formatMemberSince(profile.created_at)}</span>
+                  </span>
+                )}
               </div>
             )}
 
             {/* Qué buscás */}
             {profile?.looking_for && profile.looking_for.length > 0 && (
-              <div className="rounded-2xl px-4 py-3.5" style={inp}>
+              <div className="surface-card rounded-2xl px-4 py-3.5" style={inp}>
                 <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Buscando</p>
                 <div className="flex flex-wrap gap-1.5">
                   {profile.looking_for.map(v => (
@@ -275,7 +290,7 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
 
             {/* Gustos musicales */}
             {profile?.music_genres && profile.music_genres.length > 0 && (
-              <div className="rounded-2xl px-4 py-3.5" style={inp}>
+              <div className="surface-card rounded-2xl px-4 py-3.5" style={inp}>
                 <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Música</p>
                 <div className="flex flex-wrap gap-1.5">
                   {profile.music_genres.map(g => (
@@ -290,7 +305,7 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
 
             {/* Redes sociales */}
             {(profile?.instagram_handle || profile?.snapchat_handle || profile?.whatsapp) && (
-              <div className="rounded-2xl px-4 py-3.5 flex flex-col gap-3" style={inp}>
+              <div className="surface-card rounded-2xl px-4 py-3.5 flex flex-col gap-3" style={inp}>
                 <p className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>Redes</p>
                 {profile.instagram_handle && (
                   <div className="flex items-center gap-2.5">
@@ -348,7 +363,7 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
               <>
                 {/* Notificaciones */}
                 {notifPermission !== "unsupported" && (
-                  <div className="rounded-2xl px-4 py-3.5 flex items-center justify-between" style={inp}>
+                  <div className="surface-card rounded-2xl px-4 py-3.5 flex items-center justify-between" style={inp}>
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl flex items-center justify-center"
                         style={{ background: notifPermission === "granted" ? "rgba(130,150,227,0.15)" : "rgba(255,255,255,0.07)" }}>
@@ -397,7 +412,7 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
                 )}
 
                 {/* Modo fantasma */}
-                <div className="rounded-2xl px-4 py-3.5 flex items-center justify-between" style={inp}>
+                <div className="surface-card rounded-2xl px-4 py-3.5 flex items-center justify-between" style={inp}>
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
                       style={{ background: "rgba(255,255,255,0.07)" }}>
@@ -424,7 +439,7 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
 
                 {/* Editar */}
                 <button onClick={() => router.push("/settings")}
-                  className="w-full py-3.5 rounded-2xl text-sm font-semibold text-white flex items-center justify-center gap-2"
+                  className="btn-primary w-full py-3.5 rounded-2xl text-sm font-semibold text-white flex items-center justify-center gap-2"
                   style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
@@ -447,7 +462,7 @@ export function ProfileClient({ profileId, currentUserId }: Props) {
 
                 {/* Cerrar sesión */}
                 <button onClick={signOut}
-                  className="w-full py-3.5 rounded-2xl text-sm font-medium flex items-center justify-center gap-2"
+                  className="btn-danger w-full py-3.5 rounded-2xl text-sm font-medium flex items-center justify-center gap-2"
                   style={{ ...inp, color: "rgba(255,80,80,0.7)" }}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>

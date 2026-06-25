@@ -237,7 +237,7 @@ export function ChatClient({ matchId, userId }: Props) {
           className="flex-1 px-4 py-2.5 rounded-full text-white text-sm outline-none"
           style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.08)" }} />
         <button type="submit" disabled={!text.trim() || sending}
-          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 disabled:opacity-40"
+          className="btn-primary w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 disabled:opacity-40"
           style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>

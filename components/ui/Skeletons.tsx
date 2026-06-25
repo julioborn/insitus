@@ -1,7 +1,7 @@
 export function SkeletonCard() {
   return (
     <div
-      className="flex items-center gap-4 px-4 py-3 rounded-2xl"
+      className="surface-card flex items-center gap-4 px-4 py-3 rounded-2xl"
       style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
     >
       <div className="skeleton w-12 h-12 rounded-full flex-shrink-0" />

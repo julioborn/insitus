@@ -65,9 +65,14 @@ export function ChatsClient({ userId }: { userId: string }) {
               <p className="text-white font-semibold text-base">Sin conversaciones</p>
               <p className="text-white/40 text-sm mt-1">Tus conexiones aparecen acá para chatear.</p>
             </div>
+            <Link href="/matches"
+              className="btn-primary text-sm font-semibold px-5 py-3 rounded-full mt-2 text-white"
+              style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
+              Ver tus likes
+            </Link>
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 animate-fade-in">
             {matches.map(match => {
               const other = getOther(match);
               const displayName = other?.name ?? other?.first_name ?? "Usuario";
@@ -76,10 +81,10 @@ export function ChatsClient({ userId }: { userId: string }) {
 
               return (
                 <Link key={match.id} href={`/chat/${match.id}`}
-                  className="flex items-center gap-4 px-4 py-3 rounded-2xl active:scale-[0.99] transition-all"
+                  className="surface-card flex items-center gap-4 px-4 py-3 rounded-2xl active:scale-[0.99] transition-all"
                   style={{
-                    background: hasNew ? "rgba(130,150,227,0.08)" : "rgba(255,255,255,0.05)",
-                    border: hasNew ? "1px solid rgba(130,150,227,0.25)" : "1px solid rgba(255,255,255,0.07)",
+                    background: hasNew ? "rgba(130,150,227,0.08)" : "rgba(255,255,255,0.06)",
+                    border: hasNew ? "1px solid rgba(130,150,227,0.25)" : "1px solid rgba(255,255,255,0.09)",
                   }}>
                   <div className="flex-shrink-0">
                     <div className="relative w-12 h-12 rounded-full overflow-hidden"

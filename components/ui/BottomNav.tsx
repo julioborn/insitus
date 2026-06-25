@@ -75,8 +75,11 @@ export function BottomNav() {
         const active = path.startsWith(href);
         return (
           <Link key={href} href={href}
-            className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full"
-            style={{ color: active ? "#8296E3" : "rgba(255,255,255,0.38)", transition: "color 0.2s ease" }}>
+            className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full active:scale-95"
+            style={{
+              color: active ? "#8296E3" : "rgba(255,255,255,0.38)",
+              transition: "color 0.18s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}>
             {/* Pill activo + badge */}
             <span style={{
               position: "relative",
@@ -87,7 +90,7 @@ export function BottomNav() {
               height: 30,
               borderRadius: 16,
               background: active ? "rgba(130,150,227,0.16)" : "transparent",
-              transition: "background 0.2s ease",
+              transition: "background 0.18s cubic-bezier(0.4, 0, 0.2, 1)",
             }}>
               <Icon filled={active} />
               {badge > 0 && (
@@ -115,7 +118,7 @@ export function BottomNav() {
               )}
             </span>
             <span className="text-[10px] font-medium tracking-wide"
-              style={{ opacity: active ? 1 : 0.55, transition: "opacity 0.2s ease" }}>
+              style={{ opacity: active ? 1 : 0.55, transition: "opacity 0.18s cubic-bezier(0.4, 0, 0.2, 1)" }}>
               {label}
             </span>
           </Link>

@@ -101,3 +101,19 @@ header.ios-header {
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }
+
+/* Button interaction states */
+.btn-primary { transition: transform .15s ease, box-shadow .15s ease, filter .15s ease; }
+.btn-primary:hover { filter: brightness(1.08); box-shadow: 0 4px 20px rgba(130,150,227,0.35); }
+.btn-primary:active { transform: scale(0.97); filter: brightness(0.95); }
+
+.btn-secondary { transition: background .15s ease, border-color .15s ease, transform .15s ease; }
+.btn-secondary:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.16); }
+.btn-secondary:active { transform: scale(0.97); background: rgba(255,255,255,0.07); }
+
+.btn-danger { transition: background .15s ease, transform .15s ease; }
+.btn-danger:hover { background: rgba(255,59,48,0.10); }
+.btn-danger:active { transform: scale(0.97); }
+
+/* Card depth */
+.surface-card { box-shadow: 0 2px 12px rgba(0,0,0,0.35); }

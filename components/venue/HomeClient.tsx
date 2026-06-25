@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useGeoContext } from "@/contexts/GeolocationContext";
 import { usePresence } from "@/hooks/usePresence";
 import { UserCard } from "@/components/user/UserCard";
@@ -14,8 +15,8 @@ interface Props { userId: string }
 function VenueCard({ venue, onView }: { venue: Venue; onView: () => void }) {
   return (
     <div
-      className="rounded-2xl p-5 cursor-pointer active:scale-[0.98] transition-transform flex items-center gap-4"
-      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+      className="surface-card rounded-2xl p-5 cursor-pointer active:scale-[0.98] transition-transform flex items-center gap-4"
+      style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }}
       onClick={onView}
     >
       {/* Avatar circular */}
@@ -142,6 +143,11 @@ export function HomeClient({ userId }: Props) {
               <p className="text-white font-semibold text-base">Permiso de ubicación requerido</p>
               <p className="text-white/40 text-sm mt-1">Activá la ubicación para conectarte con quienes están cerca.</p>
             </div>
+            <button onClick={() => window.location.reload()}
+              className="btn-secondary text-xs font-semibold px-4 py-2.5 rounded-full mt-2"
+              style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.3)", color: "#f59e0b" }}>
+              Reintentar
+            </button>
           </div>
         )}
 
@@ -163,6 +169,11 @@ export function HomeClient({ userId }: Props) {
                 </p>
               )}
             </div>
+            <Link href="/profile/me"
+              className="btn-secondary text-xs font-semibold px-4 py-2.5 rounded-full mt-2"
+              style={{ background: "rgba(130,150,227,0.12)", border: "1px solid rgba(130,150,227,0.3)", color: "#8296E3" }}>
+              Completá tu perfil mientras tanto
+            </Link>
           </div>
         )}
 
@@ -249,12 +260,12 @@ export function HomeClient({ userId }: Props) {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button onClick={dismissBanner}
-                className="text-white/30 text-xs px-2 py-1.5 rounded-lg"
+                className="btn-secondary text-white/30 text-xs px-2 py-1.5 rounded-lg"
                 style={{ background: "rgba(255,255,255,0.05)" }}>
                 Ahora no
               </button>
               <button onClick={handleEnableNotif} disabled={notifLoading}
-                className="text-white text-xs font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50"
+                className="btn-primary text-white text-xs font-semibold px-3 py-1.5 rounded-lg disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
                 {notifLoading ? "..." : "Activar"}
               </button>

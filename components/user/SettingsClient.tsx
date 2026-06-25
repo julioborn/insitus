@@ -19,7 +19,7 @@ const GENDERS = [
   { value: "otro",   label: "Otro" },
 ];
 
-const inp = { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" };
+const inp = { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" };
 const lbl = { color: "rgba(255,255,255,0.4)" };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -162,13 +162,13 @@ export function SettingsClient({ userId }: { userId: string }) {
         <button onClick={() => router.back()} className="text-white/50 hover:text-white text-xl px-1">‹</button>
         <h1 className="text-base font-bold text-white flex-1">Editar perfil</h1>
         <button onClick={handleSave} disabled={saving}
-          className="text-sm font-semibold px-4 py-2 rounded-xl text-white disabled:opacity-40"
+          className="btn-primary text-sm font-semibold px-4 py-2 rounded-xl text-white disabled:opacity-40"
           style={{ background: "linear-gradient(135deg, #8296E3, #4762C7)" }}>
           {saving ? "..." : "Guardar"}
         </button>
       </header>
 
-      <div className="flex flex-col gap-7 px-4 py-6">
+      <div className="flex flex-col gap-7 px-4 py-6 animate-fade-in">
 
         {/* ── FOTO DE PERFIL ── */}
         <Section title="Foto de perfil">
@@ -190,7 +190,7 @@ export function SettingsClient({ userId }: { userId: string }) {
             </div>
             <div>
               <button onClick={() => avatarInputRef.current?.click()}
-                className="text-sm font-medium px-4 py-2 rounded-xl"
+                className="btn-secondary text-sm font-medium px-4 py-2 rounded-xl"
                 style={{ background: "rgba(130,150,227,0.12)", border: "1px solid rgba(130,150,227,0.25)", color: "#8296E3" }}>
                 Cambiar foto
               </button>
@@ -218,7 +218,10 @@ export function SettingsClient({ userId }: { userId: string }) {
                 className="aspect-square rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-colors"
                 style={{ ...inp, border: "1.5px dashed rgba(255,255,255,0.15)" }}>
                 {uploadingPhoto ? (
-                  <div className="w-5 h-5 rounded-full border-2 border-[#8296E3] border-t-transparent animate-spin" />
+                  <>
+                    <div className="w-5 h-5 rounded-full border-2 border-[#8296E3] border-t-transparent animate-spin" />
+                    <span className="text-[9px]" style={lbl}>Subiendo...</span>
+                  </>
                 ) : (
                   <>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.8" strokeLinecap="round">
